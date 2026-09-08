@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Datos pesados: nunca subas CSVs grandes a GitHub.
+# Documenta en el README de dónde se descargan.
+*.csv
+*.parquet
+*.xlsx
+*.db
+*.duckdb
+
+# Sistema
+.DS_Store
+Thumbs.db
+.vscode/
