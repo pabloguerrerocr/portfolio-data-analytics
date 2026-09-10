@@ -69,6 +69,25 @@ silencio— y por qué el script deliberadamente no envía aplicaciones automát
 
 ---
 
+## En otro repositorio
+
+**[EE. UU. y el sector externo de Costa Rica, 2015–2025](https://github.com/jpguerreroc/sector-externo-cr-eeuu)**
+
+**¿Costa Rica siente a Estados Unidos por el comercio o por la tasa de la Fed?**
+
+> El canal financiero domina al real en **las 14 combinaciones** de variable y
+> horizonte. A 24 meses, la tasa de fondos federales explica el **44,4 %** de la
+> varianza de las reservas internacionales y el **43,2 %** del tipo de cambio
+> efectivo real. El ciclo industrial estadounidense explica 3,3 % y 4,5 %.
+
+Tres bloques VAR/VECM sobre datos de FRED y del portal público del BCCR, con pruebas
+de raíz unitaria (ADF y KPSS, marcando las filas donde se contradicen), cointegración
+por Engle-Granger y Johansen, causalidad de Granger, impulso-respuesta con banda
+bootstrap y descomposición de varianza. Vive aparte por tamaño: son 26 figuras y 31
+tablas de salida.
+
+---
+
 ## Criterios que sigo
 
 - **El hallazgo va primero**, con número, en las primeras líneas.
