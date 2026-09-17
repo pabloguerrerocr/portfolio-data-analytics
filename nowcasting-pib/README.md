@@ -12,6 +12,20 @@
 
 ---
 
+
+## Correr
+
+```bash
+pip install -r ../requirements.txt
+python nowcast.py
+```
+
+Si los datos no están, `nowcast.py` los baja solo de la API pública de la OCDE
+(unos 760 KB). Para bajarlos aparte: `python descargar_datos.py`.
+
+Verificado el 16 set 2026 corriendo desde cero: reproduce las cifras de este
+README con datos hasta 2026-Q2.
+
 ## Por qué importa
 
 El PIB trimestral se publica con meses de rezago. Un banco central, un ministerio de

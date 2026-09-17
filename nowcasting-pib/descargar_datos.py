@@ -36,7 +36,18 @@ def descargar() -> pd.DataFrame:
     print(f"  {len(r.content):,} bytes recibidos")
 
     d = r.json()
-    estructura = d["data"]["structures"][0]
+    # La OCDE cambio el nombre de esta clave: antes "structures" (lista),
+    # ahora "structure" (objeto). Se aceptan las dos para que el script no se
+    # rompa cuando vuelvan a cambiarla.
+    if "structures" in d["data"]:
+        estructura = d["data"]["structures"][0]
+    elif "structure" in d["data"]:
+        estructura = d["data"]["structure"]
+    else:
+        raise RuntimeError(
+            "La respuesta de la OCDE no trae estructura. Claves: "
+            + ", ".join(d.get("data", {}))
+        )
     dimensiones = estructura["dimensions"]["observation"]
 
     # Catálogo de códigos por dimensión, en el mismo orden que la clave.

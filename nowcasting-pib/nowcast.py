@@ -71,6 +71,14 @@ def serie(df, measure, freq, transformacion=None, actividad=None):
 
 
 def construir_panel() -> pd.DataFrame:
+    # Si el dato no esta, se baja solo. Un repo que falla al clonarlo comunica
+    # que nunca se probo desde cero.
+    if not DATOS.exists():
+        print("No encuentro los datos. Bajandolos de la OCDE...")
+        import subprocess, sys as _s
+        r = subprocess.run([_s.executable, str(AQUI / "descargar_datos.py")])
+        if r.returncode != 0 or not DATOS.exists():
+            raise SystemExit("No se pudieron bajar los datos. Corre descargar_datos.py")
     df = pd.read_csv(DATOS)
     panel = pd.DataFrame({
         "pib": serie(df, "B1GQ_Q", "Q", transformacion="G1"),
