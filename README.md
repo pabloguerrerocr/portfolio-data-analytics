@@ -1,79 +1,67 @@
-# Portafolio de análisis de datos — José Pablo Guerrero
+# Nowcasting del PIB trimestral de Costa Rica
 
-Economista (Universidad Latina de Costa Rica), con formación en econometría y series
-de tiempo. Análisis construidos sobre datos públicos, priorizando preguntas de negocio
-sobre demostraciones de herramientas.
+**El referente ingenuo es difícil de vencer, y casi nadie lo reporta.**
 
-`Python` · `pandas` · `numpy` · `matplotlib` · `SQL` · `Excel / Power Query`
+Estimar el crecimiento del PIB antes de que se publique la cifra oficial, con
+indicadores de coyuntura de la OCDE. El resultado tiene dos números, no uno, y esa
+es la mitad del punto:
 
----
+| Contra qué se compara | Reducción del error |
+|---|---:|
+| Repetir el trimestre anterior (el referente fácil) | **30,6 %** |
+| Predecir el promedio histórico (el referente exigente) | **6,5 %** |
 
-## Nowcasting del PIB trimestral de Costa Rica
-
-**¿Se puede estimar el crecimiento del PIB antes de que se publique la cifra oficial?**
-
-> Frente a repetir el trimestre anterior, el nowcast reduce el error **30,6 %**.
-> Frente al referente exigente —predecir el promedio histórico— la mejora real es
-> **6,5 %**. Toda la señal proviene de una sola variable: la producción manufacturera
-> (t = 3,53); las exportaciones no resultan significativas.
+Casi todo el trabajo publicado de nowcasting reporta el primero. El segundo es el
+que dice si el modelo aporta algo, y acá aporta poco: el R² es **0,154**.
 
 ![Nowcast del PIB](nowcasting-pib/graficos/nowcast_pib.png)
 
-Nowcastear la variación *interanual* daba +13,7 % de mejora, pero al excluir 2020 caía
-a +0,6 %: todo el mérito era la pandemia. Cambiar el objetivo a la variación *trimestral*
-y evaluar contra **dos** referentes en lugar de uno vuelve el resultado consistente. Se
-probaron 36 especificaciones; las parsimoniosas superaron sistemáticamente a las de seis
+## Por qué el resultado honesto vale más que el resultado bonito
+
+La primera versión nowcasteaba la variación **interanual** y daba +13,7 % de mejora.
+Al excluir 2020 caía a **+0,6 %**: todo el mérito era la pandemia. Un modelo que solo
+acierta el año del derrumbe no sirve para el trimestre que viene.
+
+Cambiar el objetivo a la variación **trimestral** y evaluar contra **dos** referentes
+en lugar de uno vuelve el resultado consistente y mucho menos vistoso. Se probaron 36
+especificaciones; las parsimoniosas superaron sistemáticamente a las de seis
 predictores.
 
-El modelo no anticipa quiebres: en 2020-Q2 el PIB cayó 8,3 % y el nowcast predijo +0,4 %.
-Está declarado, junto con el R² de 0,154.
+Toda la señal viene de una sola variable: la **producción manufacturera** (t = 3,53).
+Las exportaciones no resultan significativas, que es en sí mismo un hallazgo para una
+economía que se piensa a sí misma como exportadora.
 
-**[Ver proyecto →](nowcasting-pib/)**
+## Lo que el modelo no hace
 
----
+En 2020-Q2 el PIB cayó **8,3 %** y el nowcast predijo **+0,4 %**. No anticipa quiebres
+y no pretende hacerlo. Está declarado en el código, en el reporte y acá.
 
-## Churn y valor de vida del cliente
+## Correr
 
-**¿Cuánto dura un cliente y cuánto vale retenerlo?**
+```bash
+pip install -r requirements.txt
+python nowcasting-pib/nowcast.py
+```
 
-> El contrato mes a mes presenta **42,7 % de cancelación** frente a **2,8 %** del
-> contrato a dos años. Un cliente a dos años vale **$1.964 más** en valor de vida,
-> con una cuota mensual casi idéntica. El segmento mes a mes concentra alrededor de
-> **$1,3 M** de ingreso anual en riesgo.
-
-![Curvas de supervivencia](churn-supervivencia/graficos/supervivencia.png)
-
-El conjunto de datos es transversal y no tiene fechas de alta, así que no admite una
-matriz de cohortes. El método correcto es Kaplan-Meier, tratando a los clientes activos
-como censurados por la derecha. El estimador está implementado a mano y **validado
-contra `lifelines`** (diferencia máxima 4,33e-15).
-
-Ignorar la censura habría subestimado la permanencia en 40 % (32,4 frente a 54,3 meses),
-y con ella toda la justificación económica de invertir en retención.
-
-**[Ver proyecto →](churn-supervivencia/)**
+Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
 
 ---
 
-## Buscador automático de vacantes
+## Otros repositorios
 
-Consulta APIs públicas de portales de empleo, filtra por perfil analítico y mantiene un
-registro de seguimiento que nunca sobrescribe ediciones manuales.
-
-Incorpora dos criterios que los portales publican pero rara vez se explotan: si la
-vacante admite candidatos residentes en Costa Rica, y cuántas personas ya aplicaron.
-El README documenta el comportamiento real de cada API —incluidas las que fallan en
-silencio— y por qué el script deliberadamente no envía aplicaciones automáticas.
-
-**[Ver proyecto →](buscador-vacantes/)**
+| Repositorio | De qué va |
+|---|---|
+| [warehouse-sector-externo](https://github.com/jpguerreroc/warehouse-sector-externo) | Esquema estrella en DuckDB sobre el panel del sector externo, con motor de calidad. La desacumulación en SQL reconcilia a `5,7e-14` |
+| [brecha-espejo-cr](https://github.com/jpguerreroc/brecha-espejo-cr) | Costa Rica declara exportar $19,9 mm y sus socios declaran importar $34,0 mm. Diez años de brecha espejo, analizados en SQL |
+| [comercio-exterior-cr](https://github.com/jpguerreroc/comercio-exterior-cr) | El comercio exterior se concentró en vez de diversificarse: Herfindahl de 0,160 a 0,248 entre 2010 y 2024 |
 
 ---
 
 ## Criterios que sigo
 
 - **El hallazgo va primero**, con número, en las primeras líneas.
-- **Las limitaciones se declaran.** Un resultado que no sobrevive al escrutinio es
-  un hallazgo, no un fracaso que esconder.
+- **Las limitaciones se declaran.** Un resultado que no sobrevive al escrutinio es un
+  hallazgo, no un fracaso que esconder.
 - **Datos públicos únicamente**, con descarga reproducible desde el propio script.
 - **Los datos crudos no se versionan** — el código los obtiene solo.
 
