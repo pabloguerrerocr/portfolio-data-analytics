@@ -51,9 +51,9 @@ Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
 
 | Repositorio | De qué va |
 |---|---|
-| [warehouse-sector-externo](https://github.com/jpguerreroc/warehouse-sector-externo) | Esquema estrella en DuckDB sobre el panel del sector externo, con motor de calidad. La desacumulación en SQL reconcilia a `5,7e-14` |
-| [brecha-espejo-cr](https://github.com/jpguerreroc/brecha-espejo-cr) | Costa Rica declara exportar $19,9 mm y sus socios declaran importar $34,0 mm. Diez años de brecha espejo, analizados en SQL |
-| [comercio-exterior-cr](https://github.com/jpguerreroc/comercio-exterior-cr) | El comercio exterior se concentró en vez de diversificarse: Herfindahl de 0,160 a 0,248 entre 2010 y 2024 |
+| [warehouse-sector-externo](https://github.com/pabloguerrerocr/warehouse-sector-externo) | Esquema estrella en DuckDB sobre el panel del sector externo, con motor de calidad. La desacumulación en SQL reconcilia a `5,7e-14` |
+| [brecha-espejo-cr](https://github.com/pabloguerrerocr/brecha-espejo-cr) | Costa Rica declara exportar $19,9 mm y sus socios declaran importar $34,0 mm. Diez años de brecha espejo, analizados en SQL |
+| [comercio-exterior-cr](https://github.com/pabloguerrerocr/comercio-exterior-cr) | El comercio exterior se concentró en vez de diversificarse: Herfindahl de 0,160 a 0,248 entre 2010 y 2024 |
 
 ---
 
