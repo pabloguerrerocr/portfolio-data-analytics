@@ -67,4 +67,4 @@ Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
 
 ---
 
-📍 Costa Rica · Español nativo, inglés C1 · [LinkedIn](https://linkedin.com/in/jpguerreroc)
+📍 Costa Rica · Español nativo, inglés C1 · [LinkedIn](https://linkedin.com/in/pabloguerrerocr)
