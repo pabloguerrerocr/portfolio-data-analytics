@@ -1,5 +1,7 @@
 # Nowcasting del PIB trimestral de Costa Rica
 
+*[English version](README.en.md)*
+
 **El referente ingenuo es difícil de vencer, y casi nadie lo reporta.**
 
 Estimar el crecimiento del PIB antes de que se publique la cifra oficial, con
