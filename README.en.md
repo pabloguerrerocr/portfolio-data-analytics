@@ -2,6 +2,8 @@
 
 *[Versión en español](README.md)*
 
+**[Explore the interactive dashboard →](https://pabloguerrerocr.github.io/nowcast/)** (in Spanish) Pick the period and watch the model's edge change.
+
 **The naive benchmark is hard to beat, and almost nobody reports it.**
 
 Estimating GDP growth before the official figure is published, using OECD
@@ -48,6 +50,14 @@ python nowcasting-pib/nowcast.py
 ```
 
 The data downloads itself from the OECD. No raw data is versioned.
+
+---
+
+## Also in this repository
+
+**[World population 2026](poblacion-mundial/README.en.md)** ([interactive atlas](https://pabloguerrerocr.github.io/atlas/)): Africa holds
+19% of the population and accounts for 51% of growth. A map of 234 countries, with
+the data validated before it is charted.
 
 ---
 
