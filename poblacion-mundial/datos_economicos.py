@@ -91,12 +91,15 @@ def grupos_de_ingreso():
 
 def fmi(codigo):
     """Valor del año en curso (estimación o proyección del WEO). Si el FMI no
-    lo publica para un país, el último año anterior con dato, nunca uno futuro."""
+    lo publica para un país, el último año anterior con dato, nunca uno futuro
+    y nunca más viejo que dos años: el FMI conserva cifras de 2010 para países
+    que dejó de cubrir, y pasarían por actuales."""
     datos = bajar(f"https://www.imf.org/external/datamapper/api/v1/{codigo}",
                   f"weo_{codigo}.json")
     filas = []
     for iso, por_año in datos["values"][codigo].items():
-        años = [int(a) for a, v in por_año.items() if v is not None and int(a) <= AÑO_ACTUAL]
+        años = [int(a) for a, v in por_año.items()
+                if v is not None and AÑO_ACTUAL - 2 <= int(a) <= AÑO_ACTUAL]
         if años:
             año = max(años)
             filas.append({"ISO3": iso, "year": año, "value": por_año[str(año)]})
