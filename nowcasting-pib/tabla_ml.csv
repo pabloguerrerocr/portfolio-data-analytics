@@ -1,0 +1,11 @@
+muestra,modelo,rmse,mejora_vs_ingenuo_pc,mejora_vs_promedio_pc
+completa,OLS (nowcast.py),1.595,30.455,6.299
+completa,Ridge,1.564,31.798,8.109
+completa,LASSO,1.572,31.458,7.651
+completa,Random Forest,1.591,30.641,6.55
+completa,Gradient Boosting,1.591,30.622,6.524
+sin 2020,OLS (nowcast.py),0.941,31.317,6.375
+sin 2020,Ridge,0.873,36.323,13.199
+sin 2020,LASSO,0.879,35.888,12.607
+sin 2020,Random Forest,0.889,35.127,11.568
+sin 2020,Gradient Boosting,0.916,33.146,8.868
