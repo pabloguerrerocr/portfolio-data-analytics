@@ -2,6 +2,10 @@
 
 *[Versión en español](README.md)*
 
+**[Explore the interactive atlas →](https://pabloguerrerocr.github.io/atlas/)** (in Spanish)
+
+[![Economic data](https://github.com/pabloguerrerocr/portfolio-data-analytics/actions/workflows/datos-economicos.yml/badge.svg)](https://github.com/pabloguerrerocr/portfolio-data-analytics/actions/workflows/datos-economicos.yml)
+
 **Africa holds 19% of the world's population and accounts for 51% of its growth.**
 
 Meanwhile, 62 countries are shrinking, and 27% of the world's people live in them.

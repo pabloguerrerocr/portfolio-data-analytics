@@ -2,6 +2,10 @@
 
 *[English version](README.en.md)*
 
+**[Explorar el atlas interactivo →](https://pabloguerrerocr.github.io/atlas/)**
+
+[![Datos económicos](https://github.com/pabloguerrerocr/portfolio-data-analytics/actions/workflows/datos-economicos.yml/badge.svg)](https://github.com/pabloguerrerocr/portfolio-data-analytics/actions/workflows/datos-economicos.yml)
+
 **África tiene el 19 % de la población mundial y aporta el 51 % de su crecimiento.**
 
 Mientras tanto, 62 países se achican: entre ellos viven el 27 % de las personas

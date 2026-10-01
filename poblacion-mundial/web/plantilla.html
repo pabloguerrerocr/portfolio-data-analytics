@@ -1,43 +1,44 @@
 <title>Atlas de Población 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: mesa de atlas. Cifras arriba, mapa grande con ficha del país al lado,
-   luego herramientas de análisis (hallazgos, simulador, dispersión) y la tabla completa. */
+   luego herramientas de análisis (hallazgos, simulador, dispersión) y la tabla completa.
+   Colores y tipografías: los mismos del sitio pabloguerrerocr.github.io. */
 :root {
-  --bg: #f3f5f7;
+  --bg: #f4f5f6;
   --surface: #ffffff;
-  --ink: #12202c;
-  --ink-2: #4a5866;
-  --muted: #7d8a97;
-  --line: #dde3e9;
-  --accent: #0b6e67;
-  --accent-soft: #dcefec;
+  --ink: #12243a;
+  --ink-2: #3d4a59;
+  --muted: #5d666f;
+  --line: #d7dade;
+  --accent: #a8621a;
+  --accent-soft: #f5ebe0;
   --nodata: #d6dbe0;
   --land: #e4e8ec;
-  --dot: #2a78d6;
+  --dot: #1b4f8a;
   --neg2: #104281; --neg1: #6da7ec; --mid: #eceae6; --pos1: #ef8c8b; --pos2: #9c2423;
   --seq0: #e3eefb; --seq1: #9ec5f4; --seq2: #3987e5; --seq3: #1c5cab; --seq4: #0d366b;
-  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --radius: 10px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e141a; --surface: #151d25; --ink: #edf1f4; --ink-2: #b3bec9; --muted: #7f8c99;
-    --line: #27323d; --accent: #45b8ab; --accent-soft: #173431; --nodata: #2a333d; --land: #222b34;
-    --dot: #3987e5;
+    --bg: #0e1319; --surface: #161c24; --ink: #dfe6ee; --ink-2: #b5c0cc; --muted: #95a0ac;
+    --line: #2c353f; --accent: #e0995a; --accent-soft: #2e2318; --nodata: #2a333d; --land: #222b34;
+    --dot: #7fb3e8;
     --neg2: #3987e5; --neg1: #24497a; --mid: #383835; --pos1: #7a2d2d; --pos2: #e66767;
     --seq0: #1b2938; --seq1: #1c4475; --seq2: #2a6fc4; --seq3: #6da7ec; --seq4: #cde2fb;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e141a; --surface: #151d25; --ink: #edf1f4; --ink-2: #b3bec9; --muted: #7f8c99;
-  --line: #27323d; --accent: #45b8ab; --accent-soft: #173431; --nodata: #2a333d; --land: #222b34;
-  --dot: #3987e5;
+  --bg: #0e1319; --surface: #161c24; --ink: #dfe6ee; --ink-2: #b5c0cc; --muted: #95a0ac;
+  --line: #2c353f; --accent: #e0995a; --accent-soft: #2e2318; --nodata: #2a333d; --land: #222b34;
+  --dot: #7fb3e8;
   --neg2: #3987e5; --neg1: #24497a; --mid: #383835; --pos1: #7a2d2d; --pos2: #e66767;
   --seq0: #1b2938; --seq1: #1c4475; --seq2: #2a6fc4; --seq3: #6da7ec; --seq4: #cde2fb;
   color-scheme: dark;
@@ -46,11 +47,11 @@
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
 .wrap { max-width: 1280px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; display: grid; gap: 28px; }
 h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
-h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 700; line-height: 1.05; }
-h2 { font-size: 22px; font-weight: 700; }
-h3 { font-size: 16px; font-weight: 700; }
+h1 { font-size: clamp(30px, 4.4vw, 48px); font-weight: 500; line-height: 1.05; letter-spacing: -0.02em; }
+h2 { font-size: 23px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 600; }
 p { margin: 0; }
-.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
 .lede { color: var(--ink-2); max-width: 68ch; }
 .num { font-variant-numeric: tabular-nums; }
 button, input, select { font: inherit; color: inherit; }
@@ -67,7 +68,7 @@ header.top { display: grid; gap: 10px; }
 /* KPIs */
 .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .kpi { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
-.kpi .v { font-family: var(--display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.kpi .v { font-family: var(--mono); font-size: 24px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .kpi .l { font-size: 12.5px; color: var(--ink-2); }
 @media (max-width: 960px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi .v { font-size: 22px; } }
@@ -111,7 +112,7 @@ select { border: 1px solid var(--line); background: var(--surface); border-radiu
 
 /* Ficha */
 .card-head { display: grid; gap: 2px; margin-bottom: 12px; }
-.card-head .big { font-family: var(--display); font-size: 34px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.card-head .big { font-family: var(--mono); font-size: 32px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .stat { display: grid; gap: 0; min-width: 0; }
 .stat .l { font-size: 12px; color: var(--muted); }
@@ -127,7 +128,7 @@ select { border: 1px solid var(--line); background: var(--surface); border-radiu
 @media (max-width: 560px) { .insights { grid-template-columns: minmax(0, 1fr); } }
 .insight { display: grid; gap: 6px; align-content: start; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
 .insight:hover { border-color: var(--accent); }
-.insight .v { font-family: var(--display); font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.insight .v { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .insight p { font-size: 13.5px; color: var(--ink-2); }
 .insight .go { font-size: 12.5px; color: var(--accent); font-weight: 600; }
 
@@ -139,7 +140,7 @@ select { border: 1px solid var(--line); background: var(--surface); border-radiu
 /* Simulador */
 .sim-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px; }
 #year { flex: 1 1 200px; accent-color: var(--accent); }
-.yearv { font-family: var(--display); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 70px; }
+.yearv { font-family: var(--mono); font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 70px; }
 .sim-total { font-size: 13.5px; color: var(--ink-2); margin-bottom: 8px; }
 #simSvg, #scatter { width: 100%; height: auto; display: block; overflow: visible; }
 .axis text { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
