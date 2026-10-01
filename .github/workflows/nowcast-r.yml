@@ -46,6 +46,6 @@ jobs:
             echo "Sin cambios."
           else
             git commit -m "Actualizar el gráfico de la réplica en R"
-            git pull --rebase
+            git pull --rebase --autostash
             git push
           fi
