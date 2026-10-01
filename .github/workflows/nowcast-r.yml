@@ -1,0 +1,50 @@
+# Corre la réplica en R del nowcast con datos frescos de la OCDE y verifica
+# que reproduce nowcast.py trimestre por trimestre. Guarda el gráfico de R si
+# cambió. A mano desde Actions o al cambiar el script.
+name: Nowcast en R
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "nowcasting-pib/r/**"
+      - ".github/workflows/nowcast-r.yml"
+
+permissions:
+  contents: write
+
+env:
+  LC_ALL: C.UTF-8
+
+jobs:
+  replicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Instalar R
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            r-base-core r-cran-dplyr r-cran-tidyr r-cran-ggplot2
+      - name: Python (referencia) y R (réplica)
+        working-directory: nowcasting-pib
+        run: |
+          python descargar_datos.py
+          python nowcast.py
+          Rscript r/nowcast.R
+      - name: Guardar el gráfico de R si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nowcasting-pib/graficos/nowcast_pib_r.png
+          if git diff --cached --quiet; then
+            echo "Sin cambios."
+          else
+            git commit -m "Actualizar el gráfico de la réplica en R"
+            git push
+          fi

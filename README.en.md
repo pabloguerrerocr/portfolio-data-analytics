@@ -36,6 +36,9 @@ All the signal comes from a single variable: **manufacturing production**
 (t = 3.53). Exports are not significant, which is a finding in itself for an
 economy that thinks of itself as export-driven.
 
+An [R replica](nowcasting-pib/r/nowcast.R) (dplyr, ggplot2) is checked against the
+Python version, quarter by quarter, in GitHub Actions.
+
 ## And with machine learning?
 
 Ridge, LASSO, Random Forest and Gradient Boosting, retrained every quarter with
@@ -62,6 +65,11 @@ The data downloads itself from the OECD. No raw data is versioned.
 ---
 
 ## Also in this repository
+
+**[Credit card fraud detection](deteccion-fraude/README.en.md)**: never alerting is
+99.87% accurate and saves nothing. Measured in money, alerting on probability ×
+amount saves 62.0% of fraud vs 54.5% for the best threshold when a review costs
+€15, on 284,807 real transactions with a time-based split.
 
 **[World population 2026](poblacion-mundial/README.en.md)** ([interactive atlas](https://pabloguerrerocr.github.io/atlas/)): Africa holds
 19% of the population and accounts for 51% of growth. A map of 234 countries, with

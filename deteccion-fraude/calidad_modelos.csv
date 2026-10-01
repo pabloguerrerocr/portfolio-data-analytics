@@ -1,0 +1,3 @@
+modelo,pr_auc_validacion,pr_auc_prueba,brier_prueba,fraudes_esperados_prueba,fraudes_observados_prueba
+Regresión logística,0.61976,0.68843,0.00068,92.88625,75
+Gradient Boosting,0.74947,0.79103,0.00044,69.842,75
