@@ -19,7 +19,7 @@ not accuracy, on 284,807 real transactions with 0.17% fraud.
 When review is expensive, alerting on **probability × amount > cost** saves 7.5
 points more than the best threshold, and the gap is significant. It does so by
 catching **fewer** frauds (21 vs 57): it lets the €1 ones go and chases the ones
-worth reviewing. When review is cheap, both rules tie.
+worth reviewing. When review is cheap, the gap is not significant.
 
 ![Savings by threshold](graficos/ahorro_por_umbral.png)
 
