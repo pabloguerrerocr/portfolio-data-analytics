@@ -35,6 +35,9 @@ Toda la señal viene de una sola variable: la **producción manufacturera** (t =
 Las exportaciones no resultan significativas, que es en sí mismo un hallazgo para una
 economía que se piensa a sí misma como exportadora.
 
+Hay una [réplica en R](nowcasting-pib/r/nowcast.R) (dplyr, ggplot2) que GitHub Actions
+verifica contra la versión en Python, trimestre por trimestre.
+
 ## ¿Y con machine learning?
 
 Ridge, LASSO, Random Forest y Gradient Boosting, reentrenados cada trimestre con
@@ -60,6 +63,11 @@ Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
 ---
 
 ## También en este repositorio
+
+**[Detección de fraude con tarjeta](deteccion-fraude/)**: no alertar nunca acierta el
+99,87 % y no ahorra un euro. Midiendo en dinero, alertar por probabilidad × monto
+ahorra el 62,0 % del fraude contra 54,5 % del mejor umbral cuando revisar cuesta
+€15, con 284.807 transacciones reales y partición temporal.
 
 **[Población mundial 2026](poblacion-mundial/)** ([atlas interactivo](https://pabloguerrerocr.github.io/atlas/)): África tiene el 19 % de
 la población y aporta el 51 % del crecimiento. Mapa de 234 países con datos

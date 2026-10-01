@@ -96,6 +96,18 @@ OLS tampoco se distingue del promedio histórico con significancia (p = 0,13), l
 que confirma la lectura de arriba. Con datos frescos de la OCDE las mejoras de la
 OLS quedan en 30,5 % y 6,3 %, muy cerca del 30,6 % y 6,5 % originales.
 
+## Réplica en R
+
+[`r/nowcast.R`](r/nowcast.R) reconstruye el panel con `dplyr`, estima cada
+trimestre con `lm()` y grafica con `ggplot2`. Al final compara su resultado con
+el de `nowcast.py`, trimestre por trimestre, y falla si alguna cifra difiere.
+GitHub Actions corre las dos versiones con datos frescos de la OCDE en cada
+cambio.
+
+```bash
+Rscript r/nowcast.R    # desde nowcasting-pib/, después de nowcast.py
+```
+
 ## Limitaciones — lo que el modelo no hace
 
 - **No anticipa puntos de quiebre.** En 2020-Q2 el PIB cayó 8,3 % y el nowcast
@@ -125,4 +137,5 @@ python nowcast.py            # modelo, evaluación y gráfico
 | `descargar_datos.py` | Descarga reproducible desde la API SDMX de la OCDE |
 | `nowcast.py` | Panel, backtest, diagnóstico de regresión y gráfico |
 | `ml.py` | Comparación con Ridge, LASSO, Random Forest y Gradient Boosting, con prueba de Diebold-Mariano |
+| `r/nowcast.R` | Réplica en R (dplyr, ggplot2) verificada contra `nowcast.py` |
 | `resultados_nowcast.csv` | Nowcast y referentes, trimestre por trimestre |
