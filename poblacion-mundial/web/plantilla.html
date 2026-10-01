@@ -147,7 +147,7 @@ header.top { display: grid; gap: 10px; }
 .tbl-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 #q { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 10px; min-width: 0; width: min(280px, 100%); }
 .tbl-scroll { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 8px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 880px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 980px; }
 th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 th:nth-child(-n+3), td:nth-child(-n+3) { text-align: left; }
 thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-weight: 600; font-size: 12px; color: var(--ink-2); cursor: pointer; user-select: none; }
@@ -286,6 +286,7 @@ const METRICS = {
   mig:     { label: "Migración", get: c => c.migRate, type: "div", domain: [-8, 0, 8], ticks: [-8, -4, 0, 4, 8], fmt: v => signed(v, 1) + " por mil", tick: v => signed(v), note: "Migrantes netos por cada mil habitantes. Rojo: llegan más de los que se van" },
   age:     { label: "Edad mediana", get: c => c.MedianAge, type: "seq", domain: [15, 55], ticks: [15, 25, 35, 45, 55], fmt: v => nf(1).format(v) + " años", tick: v => int(v), note: "Años. La mitad de la población es más joven que esta edad" },
   density: { label: "Densidad", get: c => c.DensityPerKm2 || null, type: "seq", log: true, domain: [1, 3000], ticks: [1, 10, 100, 1000], fmt: v => int(v) + " hab/km²", tick: v => int(v), note: "Habitantes por km², escala logarítmica" },
+  area:    { label: "Superficie", get: c => c.LandAreaKm2 || null, type: "seq", log: true, domain: [1e3, 1.7e7], ticks: [1e3, 1e4, 1e5, 1e6, 1e7], fmt: v => int(v) + " km²", tick: v => v >= 1e6 ? int(v / 1e6) + " M" : v >= 1e3 ? int(v / 1e3) + " mil" : int(v), note: "Superficie terrestre en km², escala logarítmica" },
   urban:   { label: "Urbanización", get: c => c.UrbanPopPct, type: "seq", domain: [0.1, 1], ticks: [0.2, 0.4, 0.6, 0.8, 1], fmt: v => pctU(v, 1), tick: v => pctU(v), note: "Porcentaje que vive en ciudades. Gris: sin dato" },
   pop:     { label: "Población", get: c => c.Population2026, type: "seq", log: true, domain: [1e4, 1.5e9], ticks: [1e4, 1e5, 1e6, 1e7, 1e8, 1e9], fmt: v => short(v), tick: v => short(v).replace(" mil M", "B"), note: "Personas, escala logarítmica" },
 };
@@ -630,7 +631,7 @@ function scatterTip(e, c) {
 const COLS = [
   ["Rank", "#", int], ["Country", "País", v => v], ["Continent", "Continente", v => CONT_ES[v]],
   ["Population2026", "Población", int], ["YearlyChangePct", "Cambio %", v => pct(v)], ["NetChange", "Crec. neto", v => signed(v)],
-  ["NetMigrants", "Migración", v => signed(v)], ["DensityPerKm2", "Hab/km²", int], ["FertilityRate", "Fecundidad", v => nf(2).format(v)],
+  ["NetMigrants", "Migración", v => signed(v)], ["LandAreaKm2", "Superficie km²", int], ["DensityPerKm2", "Hab/km²", int], ["FertilityRate", "Fecundidad", v => nf(2).format(v)],
   ["MedianAge", "Edad med.", v => nf(1).format(v)], ["UrbanPopPct", "Urbana", v => v == null ? "—" : pctU(v)],
 ];
 d3.select("#tbl thead tr").selectAll("th").data(COLS).join("th").attr("tabindex", 0).text(d => d[1])

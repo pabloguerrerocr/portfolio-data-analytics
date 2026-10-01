@@ -28,7 +28,7 @@ tooltips and cards that recalculate with the selection.
 ## Interactive atlas
 
 [`web/index.html`](web/index.html) opens in any browser, with no server and no
-Power BI. It has the map with 7 indicators, continent filters, a profile for each
+Power BI. It has the map with 8 indicators, continent filters, a profile for each
 country, a simulator that projects population at the current rate, and the full
 sortable table. Rebuild it with `python web/construir.py`.
 

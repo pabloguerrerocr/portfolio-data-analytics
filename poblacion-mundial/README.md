@@ -28,7 +28,7 @@ continente, tooltips por país y tarjetas que se recalculan con la selección.
 ## Atlas interactivo
 
 [`web/index.html`](web/index.html) es una página que se abre en cualquier navegador,
-sin servidor ni Power BI. Tiene el mapa con 7 indicadores, filtros por continente,
+sin servidor ni Power BI. Tiene el mapa con 8 indicadores, filtros por continente,
 la ficha de cada país, un simulador que proyecta la población con la tasa actual y la
 tabla completa ordenable. Se regenera con `python web/construir.py`.
 
