@@ -1,0 +1,40 @@
+# Corre la comparación de machine learning del nowcast con datos frescos de
+# la OCDE y guarda las tablas si cambiaron. A mano desde Actions o al cambiar
+# el script.
+name: Nowcast con machine learning
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "nowcasting-pib/ml.py"
+      - ".github/workflows/nowcast-ml.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  comparar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Bajar datos de la OCDE y comparar modelos
+        working-directory: nowcasting-pib
+        run: python ml.py
+      - name: Guardar si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f nowcasting-pib/resultados_ml.csv nowcasting-pib/tabla_ml.csv
+          if git diff --cached --quiet; then
+            echo "Sin cambios."
+          else
+            git commit -m "Actualizar la comparación de machine learning del nowcast"
+            git push
+          fi
