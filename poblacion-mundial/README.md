@@ -25,6 +25,13 @@ Estas dos imágenes son la vista previa en Python. El entregable es el reporte d
 Power BI que se arma con la guía de abajo: los mismos mapas, pero con filtros por
 continente, tooltips por país y tarjetas que se recalculan con la selección.
 
+## Atlas interactivo
+
+[`web/index.html`](web/index.html) es una página que se abre en cualquier navegador,
+sin servidor ni Power BI. Tiene el mapa con 7 indicadores, filtros por continente,
+la ficha de cada país, un simulador que proyecta la población con la tasa actual y la
+tabla completa ordenable. Se regenera con `python web/construir.py`.
+
 ## Por qué el mapa no miente
 
 Un mapa de población se ve igual de convincente con datos rotos que con datos

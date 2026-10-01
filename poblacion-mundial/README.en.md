@@ -25,6 +25,13 @@ These two images are the Python preview. The deliverable is the Power BI report 
 build with the guide below. It has the same maps, plus continent filters, per-country
 tooltips and cards that recalculate with the selection.
 
+## Interactive atlas
+
+[`web/index.html`](web/index.html) opens in any browser, with no server and no
+Power BI. It has the map with 7 indicators, continent filters, a profile for each
+country, a simulator that projects population at the current rate, and the full
+sortable table. Rebuild it with `python web/construir.py`.
+
 ## Why the map doesn't lie
 
 A population map looks just as convincing with broken data as with good data, so
