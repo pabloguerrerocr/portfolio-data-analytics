@@ -1,0 +1,25 @@
+modelo,costo_revision,politica,umbral,alertas,fraudes_detectados,exactitud_pc,fraude_detenido_eur,costo_revisiones_eur,ahorro_neto_eur,ahorro_pc_del_fraude,dif_vs_umbral_ic95_inf,dif_vs_umbral_ic95_sup
+Regresión logística,1.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Regresión logística,1.0,"Umbral 0,5",,53,39,99.9122,2605.79,53.0,2552.79,33.0276,,
+Regresión logística,1.0,Umbral elegido en validación,0.006,747,65,98.7852,5379.37,747.0,4632.37,59.9329,,
+Regresión logística,1.0,Valor esperado,,563,31,98.9888,5304.99,563.0,4741.99,61.3512,34.4735,178.6545
+Regresión logística,5.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Regresión logística,5.0,"Umbral 0,5",,53,39,99.9122,2605.79,265.0,2340.79,30.2848,,
+Regresión logística,5.0,Umbral elegido en validación,0.09,88,55,99.907,4730.9,440.0,4290.9,55.515,,
+Regresión logística,5.0,Valor esperado,,117,20,99.7332,4921.63,585.0,4336.63,56.1067,-285.4405,607.5905
+Regresión logística,15.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Regresión logística,15.0,"Umbral 0,5",,53,39,99.9122,2605.79,795.0,1810.79,23.4277,,
+Regresión logística,15.0,Umbral elegido en validación,0.1,84,54,99.9105,4722.9,1260.0,3462.9,44.8025,,
+Regresión logística,15.0,Valor esperado,,50,15,99.8332,4762.84,750.0,4012.84,51.9175,92.2375,1147.392
+Gradient Boosting,1.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Gradient Boosting,1.0,"Umbral 0,5",,65,56,99.9508,5086.09,65.0,5021.09,64.9621,,
+Gradient Boosting,1.0,Umbral elegido en validación,0.07,74,57,99.9386,5323.35,74.0,5249.35,67.9153,,
+Gradient Boosting,1.0,Valor esperado,,218,33,99.6015,5941.29,218.0,5723.29,74.0471,-178.8878,2348.5142
+Gradient Boosting,5.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Gradient Boosting,5.0,"Umbral 0,5",,65,56,99.9508,5086.09,325.0,4761.09,61.5983,,
+Gradient Boosting,5.0,Umbral elegido en validación,0.07,74,57,99.9386,5323.35,370.0,4953.35,64.0857,,
+Gradient Boosting,5.0,Valor esperado,,61,24,99.8455,5285.97,305.0,4980.97,64.443,-51.729,103.9032
+Gradient Boosting,15.0,Sin modelo (nunca alertar),,0,0,99.8683,0.0,0.0,0.0,0.0,,
+Gradient Boosting,15.0,"Umbral 0,5",,65,56,99.9508,5086.09,975.0,4111.09,53.1887,,
+Gradient Boosting,15.0,Umbral elegido en validación,0.07,74,57,99.9386,5323.35,1110.0,4213.35,54.5117,,
+Gradient Boosting,15.0,Valor esperado,,31,21,99.8876,5259.24,465.0,4794.24,62.0272,378.9178,782.1368
