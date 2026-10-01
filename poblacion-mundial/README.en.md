@@ -28,9 +28,26 @@ tooltips and cards that recalculate with the selection.
 ## Interactive atlas
 
 [`web/index.html`](web/index.html) opens in any browser, with no server and no
-Power BI. It has the map with 8 indicators, continent filters, a profile for each
+Power BI. It has the map with 18 population and economic indicators, continent and income filters, a profile for each
 country, a simulator that projects population at the current rate, and the full
 sortable table. Rebuild it with `python web/construir.py`.
+
+## Economic data that updates itself
+
+`datos_economicos.py` pulls GDP per capita, growth, inflation, debt, life expectancy,
+remittances, youth unemployment, dependency and Gini from the **World Bank** (latest
+year published per country) and the **IMF** (2026 estimates and projections). Every
+value carries its year, and IMF figures more than two years old are dropped so nothing
+stale passes as current. A GitHub Actions workflow runs it on the 5th of each month and
+commits `datos/economia.csv` when something changed.
+
+What it adds:
+
+- Low and lower-middle income countries hold **45%** of the population and **85%** of
+  its growth. High-income countries: 17% and 3%.
+- In **20 countries** (488 M people) population grows faster than the economy in 2026,
+  so income per person falls.
+- Wealth and fertility have a rank correlation of **−0.80** across 198 countries.
 
 ## Why the map doesn't lie
 

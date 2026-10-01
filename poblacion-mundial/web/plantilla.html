@@ -80,6 +80,14 @@ header.top { display: grid; gap: 10px; }
 .seg { display: flex; flex-wrap: wrap; gap: 4px; }
 .seg button { border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 4px 10px; font-size: 13px; cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.filters .flabel { font-size: 12px; color: var(--muted); min-width: 64px; }
+.selbox { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; max-width: 100%; }
+.yr { color: var(--muted); font-size: 11px; }
+.card-sec { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.pill { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-size: 11.5px; color: var(--ink-2); }
+.corr { font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; }
+.axes { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 8px; }
 .toggle { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); cursor: pointer; }
 .mapbox { position: relative; }
 #map { width: 100%; height: auto; display: block; touch-action: none; cursor: grab; }
@@ -114,7 +122,7 @@ header.top { display: grid; gap: 10px; }
 .linkish { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
 
 /* Hallazgos */
-.insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 980px) { .insights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .insights { grid-template-columns: minmax(0, 1fr); } }
 .insight { display: grid; gap: 6px; align-content: start; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
@@ -147,7 +155,7 @@ header.top { display: grid; gap: 10px; }
 .tbl-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 #q { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 10px; min-width: 0; width: min(280px, 100%); }
 .tbl-scroll { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 8px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 980px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 1300px; }
 th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 th:nth-child(-n+3), td:nth-child(-n+3) { text-align: left; }
 thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-weight: 600; font-size: 12px; color: var(--ink-2); cursor: pointer; user-select: none; }
@@ -163,19 +171,22 @@ footer { color: var(--muted); font-size: 12.5px; display: grid; gap: 4px; }
 
 <div class="wrap">
   <header class="top">
-    <span class="eyebrow">Atlas de población · 234 países y territorios · 2026</span>
+    <span class="eyebrow">Atlas de población y economía · 234 países y territorios · 2026</span>
     <h1 id="headline">El mundo suma 69 millones de personas al año, y la mitad nace en África</h1>
-    <p class="lede">Elige un indicador para colorear el mapa, filtra por continente y toca cualquier país para ver su ficha. Todas las cifras se recalculan con el filtro.</p>
+    <p class="lede">Elige uno de 18 indicadores demográficos y económicos para colorear el mapa, filtra por continente o nivel de ingreso y toca cualquier país para ver su ficha. Todas las cifras se recalculan con el filtro.</p>
   </header>
 
-  <div class="filters" id="contFilters" role="group" aria-label="Filtrar por continente"></div>
+  <div style="display:grid;gap:8px">
+    <div class="filters" id="contFilters" role="group" aria-label="Filtrar por continente"><span class="flabel">Continente</span></div>
+    <div class="filters" id="incFilters" role="group" aria-label="Filtrar por nivel de ingreso"><span class="flabel">Ingreso</span></div>
+  </div>
 
   <section class="kpis" id="kpis" aria-label="Resumen"></section>
 
   <section class="atlas">
     <div class="panel">
       <div class="maptools">
-        <div class="seg" id="metricSeg" role="group" aria-label="Indicador del mapa"></div>
+        <label class="selbox" for="metricSel">Colorear por <select id="metricSel"></select></label>
         <label class="toggle" for="bubbles"><input type="checkbox" id="bubbles" checked> Burbujas de población</label>
       </div>
       <div class="mapbox" id="mapbox">
@@ -220,9 +231,14 @@ footer { color: var(--muted); font-size: 12.5px; display: grid; gap: 4px; }
     </div>
     <div class="panel">
       <div class="sec-head">
-        <h2>Fecundidad contra edad</h2>
-        <p>Cada círculo es un país, con área proporcional a su población. A la izquierda de la línea de 2,1 hijos, la población envejece y a la larga se achica sin migración.</p>
+        <h2 id="scTitle">Riqueza contra fecundidad</h2>
+        <p>Cada círculo es un país, con área proporcional a su población. Cambia los ejes para cruzar cualquier par de indicadores.</p>
       </div>
+      <div class="axes">
+        <label class="selbox" for="xSel">Eje X <select id="xSel"></select></label>
+        <label class="selbox" for="ySel">Eje Y <select id="ySel"></select></label>
+      </div>
+      <p class="corr" id="corr"></p>
       <svg id="scatter" viewBox="0 0 560 400"></svg>
     </div>
   </section>
@@ -241,8 +257,8 @@ footer { color: var(--muted); font-size: 12.5px; display: grid; gap: 4px; }
   </section>
 
   <footer>
-    <p>Fuente: Worldometer, estimaciones 2026 basadas en <i>World Population Prospects</i> de la ONU. Límites: Natural Earth 1:110m.</p>
-    <p>Las tasas de grupos se ponderan por población: un promedio simple le daría a Tuvalu el mismo peso que a India. 24 territorios no publican población urbana.</p>
+    <p>Población: Worldometer, estimaciones 2026 basadas en <i>World Population Prospects</i> de la ONU. Economía: Banco Mundial (<i>World Development Indicators</i>, último año disponible por país) y FMI (<i>World Economic Outlook</i>, 2026). Cada dato económico muestra su año. Límites: Natural Earth 1:110m.</p>
+    <p>Las tasas de grupos se ponderan por población: un promedio simple le daría a Tuvalu el mismo peso que a India. El crecimiento del ingreso por persona es el PIB real 2026 del FMI menos el crecimiento de la población. Los territorios sin dato económico aparecen en gris.</p>
   </footer>
 </div>
 
@@ -262,6 +278,8 @@ const GEO_ALIAS = { SOL: "SOM", CYN: "CYP" }; // Somalilandia y Chipre del Norte
 const WORLD_POP = d3.sum(C, c => c.Population2026);
 const WORLD_NET = d3.sum(C, c => c.NetChange);
 const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "South America", "Oceania"];
+const INCOMES = ["Low income", "Lower middle income", "Upper middle income", "High income"];
+const INC_ES = { "Low income": "Bajo", "Lower middle income": "Medio-bajo", "Upper middle income": "Medio-alto", "High income": "Alto" };
 const CONT_ES = { "Africa": "África", "Asia": "Asia", "Europe": "Europa", "North America": "Norte y Centroamérica", "South America": "Sudamérica", "Oceania": "Oceanía" };
 
 // ---------- Formato (es: punto de miles, coma decimal) ----------
@@ -280,6 +298,7 @@ function short(v) {
 const shortS = v => (v > 0 ? "+" : "") + short(v);
 
 // ---------- Indicadores ----------
+const usd = v => "$" + int(v);
 const METRICS = {
   change:  { label: "Cambio anual", get: c => c.YearlyChangePct, type: "div", domain: [-0.02, 0, 0.035], ticks: [-0.02, -0.01, 0, 0.01, 0.02, 0.03], fmt: v => pct(v, 2), tick: v => signed(v * 100) + "%", note: "Azul: pierde población · rojo: gana" },
   fert:    { label: "Fecundidad", get: c => c.FertilityRate, type: "div", domain: [0.7, 2.1, 6], ticks: [1, 2.1, 3, 4, 5, 6], fmt: v => nf(2).format(v) + " hijos", tick: v => nf(v === 2.1 ? 1 : 0).format(v), note: "Hijos por mujer. Gris = 2,1, el nivel de reemplazo" },
@@ -289,7 +308,18 @@ const METRICS = {
   area:    { label: "Superficie", get: c => c.LandAreaKm2 || null, type: "seq", log: true, domain: [1e3, 1.7e7], ticks: [1e3, 1e4, 1e5, 1e6, 1e7], fmt: v => int(v) + " km²", tick: v => v >= 1e6 ? int(v / 1e6) + " M" : v >= 1e3 ? int(v / 1e3) + " mil" : int(v), note: "Superficie terrestre en km², escala logarítmica" },
   urban:   { label: "Urbanización", get: c => c.UrbanPopPct, type: "seq", domain: [0.1, 1], ticks: [0.2, 0.4, 0.6, 0.8, 1], fmt: v => pctU(v, 1), tick: v => pctU(v), note: "Porcentaje que vive en ciudades. Gris: sin dato" },
   pop:     { label: "Población", get: c => c.Population2026, type: "seq", log: true, domain: [1e4, 1.5e9], ticks: [1e4, 1e5, 1e6, 1e7, 1e8, 1e9], fmt: v => short(v), tick: v => short(v).replace(" mil M", "B"), note: "Personas, escala logarítmica" },
+  gdppc:   { eco: true, label: "PIB per cápita", get: c => c.GdpPcPpp, yk: "GdpPcPppYear", type: "seq", log: true, domain: [1000, 120000], ticks: [1000, 3000, 10000, 30000, 100000], fmt: usd, tick: v => v >= 1000 ? int(v / 1000) + " mil" : int(v), note: "Dólares internacionales de 2021 (PPA), escala logarítmica. Banco Mundial" },
+  pcgrow:  { eco: true, label: "Ingreso por persona 2026", get: c => c.GdpPcGrowth, type: "div", domain: [-4, 0, 6], ticks: [-4, -2, 0, 2, 4, 6], fmt: v => signed(v, 1) + " %", tick: v => signed(v) + "%", note: "Crecimiento del PIB real menos el de la población. Azul: cada persona tiene menos" },
+  growth:  { eco: true, label: "Crecimiento del PIB", get: c => c.GdpGrowth, yk: "GdpGrowthYear", type: "div", domain: [-4, 0, 8], ticks: [-4, 0, 4, 8], fmt: v => signed(v, 1) + " %", tick: v => signed(v) + "%", note: "PIB real, estimación o proyección del FMI para 2026" },
+  life:    { eco: true, label: "Esperanza de vida", get: c => c.LifeExpectancy, yk: "LifeExpectancyYear", type: "seq", domain: [55, 85], ticks: [55, 65, 75, 85], fmt: v => nf(1).format(v) + " años", tick: v => int(v), note: "Años al nacer. Banco Mundial" },
+  dep:     { eco: true, label: "Dependencia", get: c => c.DependencyRatio, yk: "DependencyRatioYear", type: "seq", domain: [20, 100], ticks: [20, 40, 60, 80, 100], fmt: v => nf(0).format(v) + " por 100", tick: v => int(v), note: "Menores de 15 y mayores de 64 por cada 100 personas en edad de trabajar" },
+  remit:   { eco: true, label: "Remesas", get: c => c.RemittancesPctGdp || null, yk: "RemittancesPctGdpYear", type: "seq", log: true, domain: [0.1, 40], ticks: [0.1, 1, 10, 40], fmt: v => nf(1).format(v) + " % del PIB", tick: v => nf(v < 1 ? 1 : 0).format(v) + "%", note: "Dinero que envían los emigrantes, % del PIB, escala logarítmica" },
+  youth:   { eco: true, label: "Desempleo juvenil", get: c => c.YouthUnemployment, yk: "YouthUnemploymentYear", type: "seq", domain: [0, 50], ticks: [0, 10, 20, 30, 40, 50], fmt: v => nf(1).format(v) + " %", tick: v => int(v) + "%", note: "15 a 24 años, % de la fuerza laboral (estimación de la OIT)" },
+  infl:    { eco: true, label: "Inflación", get: c => c.Inflation, yk: "InflationYear", type: "div", domain: [-2, 3, 15], ticks: [-2, 0, 3, 6, 9, 12, 15], fmt: v => signed(v, 1) + " %", tick: v => int(v) + "%", note: "Promedio anual, FMI. Gris = 3 %; 15 % o más, mismo rojo" },
+  debt:    { eco: true, label: "Deuda pública", get: c => c.PublicDebtPctGdp, yk: "PublicDebtPctGdpYear", type: "seq", domain: [0, 150], ticks: [0, 50, 100, 150], fmt: v => nf(0).format(v) + " % del PIB", tick: v => int(v) + "%", note: "Deuda bruta del gobierno general, % del PIB. FMI" },
+  gini:    { eco: true, label: "Desigualdad (Gini)", get: c => c.Gini, yk: "GiniYear", type: "seq", domain: [25, 55], ticks: [25, 35, 45, 55], fmt: v => nf(1).format(v), tick: v => int(v), note: "0 = igualdad total, 100 = máxima desigualdad. Banco Mundial" },
 };
+const yearOf = (m, c) => m.yk && c[m.yk] ? ` <span class="yr">(${c[m.yk]})</span>` : "";
 
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 let colorOf;
@@ -317,14 +347,19 @@ function buildScale() {
 }
 
 // ---------- Estado ----------
-const state = { metric: "change", cont: null, sel: null, bubbles: true, year: 2040, sort: { key: "Population2026", dir: -1 }, q: "" };
-const inFilter = c => !state.cont || c.Continent === state.cont;
+const state = { metric: "change", cont: null, inc: null, sx: "GdpPcPpp", sy: "FertilityRate", sel: null, bubbles: true, year: 2040, sort: { key: "Population2026", dir: -1 }, q: "" };
+const inFilter = c => (!state.cont || c.Continent === state.cont) && (!state.inc || c.IncomeGroup === state.inc);
+const filterName = () => [state.cont && CONT_ES[state.cont], state.inc && "ingreso " + INC_ES[state.inc].toLowerCase()].filter(Boolean).join(" · ") || "Mundo";
 
 // ---------- Filtros de continente ----------
 const contBox = d3.select("#contFilters");
 contBox.selectAll("button").data([null, ...CONTINENTS]).join("button")
   .attr("class", "chip").text(d => d ? CONT_ES[d] : "Todo el mundo")
   .on("click", (e, d) => { state.cont = d; render(); });
+const incBox = d3.select("#incFilters");
+incBox.selectAll("button").data([null, ...INCOMES]).join("button")
+  .attr("class", "chip").text(d => d ? INC_ES[d] : "Todos")
+  .on("click", (e, d) => { state.inc = d; render(); });
 
 // ---------- KPIs ----------
 function kpis() {
@@ -335,7 +370,7 @@ function kpis() {
   const below = d3.sum(s.filter(c => c.FertilityRate < 2.1), c => c.Population2026) / pop;
   const age = d3.sum(s, c => c.MedianAge * c.Population2026) / pop;
   const items = [
-    [short(pop), state.cont ? `personas · ${pctU(pop / WORLD_POP, 1)} del mundo` : "personas en 2026"],
+    [short(pop), (state.cont || state.inc) ? `personas · ${pctU(pop / WORLD_POP, 1)} del mundo` : "personas en 2026"],
     [shortS(net), "crecimiento neto en el año"],
     [pct(rate), "cambio anual, ponderado"],
     [pctU(net / WORLD_NET, 1), "del crecimiento mundial"],
@@ -391,7 +426,7 @@ function showTip(e, c, f) {
   if (!c) { tip.attr("hidden", null).html(`<b>Sin dato</b><div class="row"><span>${f ? f.id : ""}</span></div>`); placeTip(e); return; }
   const m = METRICS[state.metric];
   const rows = [
-    [m.label, m.fmt(m.get(c))],
+    [m.label, m.get(c) == null || Number.isNaN(m.get(c)) ? "sin dato" : m.fmt(m.get(c)) + yearOf(m, c)],
     ["Población", short(c.Population2026)],
     ["Cambio anual", pct(c.YearlyChangePct)],
     ["Crecimiento neto", shortS(c.NetChange)],
@@ -412,7 +447,7 @@ function hideTip() { tip.attr("hidden", true); }
 function renderMap() {
   buildScale();
   paths.attr("fill", f => colorOf(geoCountry(f)))
-    .classed("faded", f => { const c = geoCountry(f); return state.cont && (!c || c.Continent !== state.cont); })
+    .classed("faded", f => { const c = geoCountry(f); return (state.cont || state.inc) && (!c || !inFilter(c)); })
     .classed("sel", f => { const c = geoCountry(f); return c && c.ISO3 === state.sel; });
   bubbles.attr("display", state.bubbles ? null : "none")
     .classed("faded", c => !inFilter(c))
@@ -441,8 +476,15 @@ function renderLegend() {
 }
 
 // Selector de indicador
-d3.select("#metricSeg").selectAll("button").data(Object.entries(METRICS)).join("button")
-  .text(d => d[1].label).on("click", (e, d) => { state.metric = d[0]; render(); });
+{
+  const sel = d3.select("#metricSel");
+  [["Población", false], ["Economía", true]].forEach(([g, eco]) => {
+    const og = sel.append("optgroup").attr("label", g);
+    Object.entries(METRICS).filter(([, m]) => !!m.eco === eco)
+      .forEach(([k, m]) => og.append("option").attr("value", k).text(m.label));
+  });
+  sel.on("change", e => { state.metric = e.target.value; render(); });
+}
 d3.select("#bubbles").on("change", e => { state.bubbles = e.target.checked; renderMap(); });
 
 // ---------- Ficha del país ----------
@@ -455,7 +497,7 @@ function renderCard() {
     const s = C.filter(inFilter);
     const pop = d3.sum(s, d => d.Population2026);
     const agg = {
-      Country: state.cont ? CONT_ES[state.cont] : "Mundo",
+      Country: filterName(),
       sub: `${s.length} países y territorios`,
       Population2026: pop, NetChange: d3.sum(s, d => d.NetChange), NetMigrants: d3.sum(s, d => d.NetMigrants),
       NaturalIncrease: d3.sum(s, d => d.NaturalIncrease),
@@ -465,6 +507,11 @@ function renderCard() {
       LandAreaKm2: d3.sum(s, d => d.LandAreaKm2),
     };
     agg.YearlyChangePct = agg.NetChange / (pop - agg.NetChange);
+    // PIB per cápita del grupo = PIB total / población (solo países con dato).
+    const g = s.filter(d => d.GdpPcPpp != null);
+    agg.GdpPcPpp = d3.sum(g, d => d.GdpPcPpp * d.Population2026) / d3.sum(g, d => d.Population2026);
+    const l = s.filter(d => d.LifeExpectancy != null);
+    agg.LifeExpectancy = d3.sum(l, d => d.LifeExpectancy * d.Population2026) / d3.sum(l, d => d.Population2026);
     const u = s.filter(d => d.UrbanPopPct != null);
     agg.UrbanPopPct = d3.sum(u, d => d.UrbanPopPct * d.Population2026) / d3.sum(u, d => d.Population2026);
     return cardHtml(card, agg, true);
@@ -492,16 +539,35 @@ function cardHtml(card, c, isAgg) {
       <span class="mini-note">${int(c.Population2026)} personas</span>
     </div>
     <div class="stats">${stats.map(s => `<div class="stat"><span class="l">${s[0]}</span><span class="v">${s[1]}</span></div>`).join("")}</div>
+    ${ecoHtml(c, isAgg)}
     <div class="decomp">
       <h3>De dónde viene el cambio</h3>
       <svg id="decomp" viewBox="0 0 300 64"></svg>
       <p class="mini-note">${decompNote(c)}</p>
     </div>
     ${isAgg ? `<p class="mini-note" style="margin-top:10px">Toca un país en el mapa, el gráfico o la tabla para ver su ficha.</p>`
-            : `<p style="margin-top:10px"><button class="linkish" id="clearSel">Volver a ${state.cont ? CONT_ES[state.cont] : "Mundo"}</button></p>`}
+            : `<p style="margin-top:10px"><button class="linkish" id="clearSel">Volver a ${filterName()}</button></p>`}
   `);
   d3.select("#clearSel").on("click", () => { state.sel = null; render(); });
   drawDecomp(c);
+}
+
+function ecoHtml(c, isAgg) {
+  const v = (k, f, yk) => c[k] == null || Number.isNaN(c[k]) ? "sin dato" : f(c[k]) + (yk && c[yk] ? ` <span class="yr">${c[yk]}</span>` : "");
+  const rows = isAgg
+    ? [["PIB per cápita (PPA)", v("GdpPcPpp", usd)], ["Esperanza de vida", v("LifeExpectancy", x => nf(1).format(x) + " años")]]
+    : [
+        ["PIB per cápita (PPA)", v("GdpPcPpp", usd, "GdpPcPppYear")],
+        ["Crecimiento del PIB", v("GdpGrowth", x => signed(x, 1) + " %", "GdpGrowthYear")],
+        ["Ingreso por persona 2026", v("GdpPcGrowth", x => signed(x, 1) + " %")],
+        ["Inflación", v("Inflation", x => signed(x, 1) + " %", "InflationYear")],
+        ["Esperanza de vida", v("LifeExpectancy", x => nf(1).format(x) + " años", "LifeExpectancyYear")],
+        ["Desempleo juvenil", v("YouthUnemployment", x => nf(1).format(x) + " %", "YouthUnemploymentYear")],
+        ["Remesas", v("RemittancesPctGdp", x => nf(1).format(x) + " % PIB", "RemittancesPctGdpYear")],
+        ["Deuda pública", v("PublicDebtPctGdp", x => nf(0).format(x) + " % PIB", "PublicDebtPctGdpYear")],
+      ];
+  const pill = !isAgg && c.IncomeGroup ? ` <span class="pill">Ingreso ${INC_ES[c.IncomeGroup].toLowerCase()}</span>` : "";
+  return `<div class="card-sec"><h3>Economía${pill}</h3><div class="stats">${rows.map(r => `<div class="stat"><span class="l">${r[0]}</span><span class="v">${r[1]}</span></div>`).join("")}</div></div>`;
 }
 
 function decompNote(c) {
@@ -537,11 +603,16 @@ function insights() {
   const shrink = C.filter(c => c.NetChange < 0);
   const below = sum(c => c.FertilityRate < 2.1) / WORLD_POP;
   const euNat = sum(eu, "NaturalIncrease"), euMig = sum(eu, "NetMigrants");
+  const poorer = c => c.IncomeGroup === "Low income" || c.IncomeGroup === "Lower middle income";
+  const poorShareGrowth = sum(poorer, "NetChange") / WORLD_NET, poorSharePop = sum(poorer) / WORLD_POP;
+  const fall = C.filter(c => c.GdpPcGrowth < 0);
   const list = [
-    { v: pctU(afGrowth), t: `del crecimiento mundial ocurre en África, que tiene el ${pctU(afPop)} de la población.`, go: { metric: "change", cont: "Africa" } },
-    { v: String(shrink.length), t: `países pierden población. Allí vive el ${pctU(sum(c => c.NetChange < 0) / WORLD_POP)} de la humanidad, China incluida.`, go: { metric: "change", cont: null } },
-    { v: pctU(below), t: "de las personas vive en un país donde se tienen menos de 2,1 hijos por mujer.", go: { metric: "fert", cont: null } },
-    { v: short(euNat), t: `es el saldo de nacimientos menos muertes en Europa. La migración (${shortS(euMig)}) amortigua la caída.`, go: { metric: "mig", cont: "Europe" } },
+    { v: pctU(afGrowth), t: `del crecimiento mundial ocurre en África, que tiene el ${pctU(afPop)} de la población.`, go: { metric: "change", cont: "Africa", inc: null } },
+    { v: String(shrink.length), t: `países pierden población. Allí vive el ${pctU(sum(c => c.NetChange < 0) / WORLD_POP)} de la humanidad, China incluida.`, go: { metric: "change", cont: null, inc: null } },
+    { v: pctU(below), t: "de las personas vive en un país donde se tienen menos de 2,1 hijos por mujer.", go: { metric: "fert", cont: null, inc: null } },
+    { v: short(euNat), t: `es el saldo de nacimientos menos muertes en Europa. La migración (${shortS(euMig)}) amortigua la caída.`, go: { metric: "mig", cont: "Europe", inc: null } },
+    { v: pctU(poorShareGrowth), t: `del crecimiento de la población ocurre en países de ingreso bajo y medio-bajo, que tienen el ${pctU(poorSharePop)} de la gente.`, go: { metric: "gdppc", cont: null, inc: null } },
+    { v: String(fall.length), t: `países donde la población crece más rápido que la economía en 2026: el ingreso por persona cae para ${short(d3.sum(fall, c => c.Population2026))} de personas.`, go: { metric: "pcgrow", cont: null, inc: null } },
   ];
   d3.select("#insights").selectAll("button").data(list).join("button").attr("class", "insight")
     .html(d => `<span class="v">${d.v}</span><p>${d.t}</p><span class="go">Ver en el mapa →</span>`)
@@ -560,7 +631,7 @@ function renderSim() {
   const tot0 = d3.sum(s, d => d.p0), tot = d3.sum(s, d => d.p);
   const r0 = new Map([...s].sort((a, b) => b.p0 - a.p0).map((d, i) => [d.c.ISO3, i + 1]));
   const top = [...s].sort((a, b) => b.p - a.p).slice(0, 10);
-  d3.select("#simTotal").html(`${state.cont ? CONT_ES[state.cont] : "Mundo"} en ${state.year}: <b class="num">${short(tot)}</b> (${pct(tot / tot0 - 1, 1)} frente a 2026)`);
+  d3.select("#simTotal").html(`${filterName()} en ${state.year}: <b class="num">${short(tot)}</b> (${pct(tot / tot0 - 1, 1)} frente a 2026)`);
 
   const g = d3.select("#simSvg"); g.selectAll("*").remove();
   const m = { l: 128, r: 74, t: 4, b: 24 }, w = 560, h = 360;
@@ -592,34 +663,94 @@ function renderSim() {
 }
 
 // ---------- Dispersión ----------
+const AXES = {
+  GdpPcPpp: { label: "PIB per cápita (PPA, $)", log: true, fmt: usd },
+  FertilityRate: { label: "Fecundidad (hijos por mujer)", fmt: v => nf(2).format(v), ref: 2.1, refLabel: "2,1 · reemplazo" },
+  MedianAge: { label: "Edad mediana (años)", fmt: v => nf(1).format(v) },
+  LifeExpectancy: { label: "Esperanza de vida (años)", fmt: v => nf(1).format(v) },
+  YearlyChangePct: { label: "Cambio anual de la población", fmt: v => pct(v), ref: 0 },
+  GdpGrowth: { label: "Crecimiento del PIB 2026 (%)", fmt: v => signed(v, 1) + " %", ref: 0 },
+  GdpPcGrowth: { label: "Ingreso por persona 2026 (%)", fmt: v => signed(v, 1) + " %", ref: 0 },
+  DependencyRatio: { label: "Dependencia (por 100 en edad de trabajar)", fmt: v => nf(0).format(v) },
+  UrbanPopPct: { label: "Urbanización", fmt: v => pctU(v) },
+  RemittancesPctGdp: { label: "Remesas (% del PIB)", log: true, fmt: v => nf(1).format(v) + " %" },
+  YouthUnemployment: { label: "Desempleo juvenil (%)", fmt: v => nf(1).format(v) + " %" },
+  PublicDebtPctGdp: { label: "Deuda pública (% del PIB)", fmt: v => nf(0).format(v) + " %" },
+  Gini: { label: "Desigualdad (Gini)", fmt: v => nf(1).format(v) },
+  DensityPerKm2: { label: "Densidad (hab/km²)", log: true, fmt: v => int(v) },
+};
+for (const [id, key] of [["#xSel", "sx"], ["#ySel", "sy"]]) {
+  d3.select(id).selectAll("option").data(Object.entries(AXES)).join("option").attr("value", d => d[0]).text(d => d[1].label);
+  d3.select(id).property("value", state[key]).on("change", e => { state[key] = e.target.value; renderScatter(); });
+}
+// Correlación de rangos (Spearman): no la distorsionan los extremos ni la escala log.
+function spearman(xs, ys) {
+  const rank = a => { const o = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0]), r = new Array(a.length);
+    for (let i = 0; i < o.length;) { let j = i; while (j + 1 < o.length && o[j + 1][0] === o[i][0]) j++; for (let k = i; k <= j; k++) r[o[k][1]] = (i + j) / 2; i = j + 1; } return r; };
+  const rx = rank(xs), ry = rank(ys), mx = d3.mean(rx), my = d3.mean(ry);
+  return d3.sum(rx, (v, i) => (v - mx) * (ry[i] - my)) / Math.sqrt(d3.sum(rx, v => (v - mx) ** 2) * d3.sum(ry, v => (v - my) ** 2));
+}
 function renderScatter() {
   const g = d3.select("#scatter"); g.selectAll("*").remove();
-  const w = 560, h = 400, m = { l: 40, r: 12, t: 10, b: 38 };
-  const x = d3.scaleLinear().domain([0.5, 6.2]).range([m.l, w - m.r]);
-  const y = d3.scaleLinear().domain([12, 58]).range([h - m.b, m.t]);
-  const r = d3.scaleSqrt().domain([0, d3.max(C, c => c.Population2026)]).range([1.5, 30]);
-  g.append("g").attr("class", "grid").selectAll("line").data(y.ticks(5)).join("line").attr("x1", m.l).attr("x2", w - m.r).attr("y1", y).attr("y2", y);
-  g.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(6).tickSize(0).tickFormat(v => nf(0).format(v))).call(a => a.select(".domain").remove()).selectAll("text").attr("dy", "1.1em");
-  g.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0)).call(a => a.select(".domain").remove()).selectAll("text").attr("dx", "-0.4em");
-  g.append("text").attr("class", "lbl-2").attr("x", w - m.r).attr("y", h - 4).attr("text-anchor", "end").text("Hijos por mujer →");
-  g.append("text").attr("class", "lbl-2").attr("x", m.l + 4).attr("y", m.t + 10).text("↑ Edad mediana (años)");
-  g.append("line").attr("x1", x(2.1)).attr("x2", x(2.1)).attr("y1", m.t).attr("y2", h - m.b).attr("stroke", css("--ink-2")).attr("stroke-dasharray", "4 3");
-  g.append("text").attr("class", "lbl-2").attr("x", x(2.1) + 5).attr("y", h - m.b - 8).text("2,1 · reemplazo");
-  const data = [...C].sort((a, b) => b.Population2026 - a.Population2026);
+  const ax = AXES[state.sx], ay = AXES[state.sy];
+  const ok = c => [state.sx, state.sy].every(k => c[k] != null && !Number.isNaN(c[k]) && (!AXES[k].log || c[k] > 0));
+  const data = C.filter(ok).sort((a, b) => b.Population2026 - a.Population2026);
+  const w = 560, h = 400, m = { l: 48, r: 14, t: 12, b: 40 };
+  const scale = (a, k, range) => {
+    const ext = d3.extent(data, c => c[k]);
+    return a.log ? d3.scaleLog().domain([ext[0] / 1.15, ext[1] * 1.15]).range(range)
+                 : d3.scaleLinear().domain(ext).nice().range(range);
+  };
+  const x = scale(ax, state.sx, [m.l, w - m.r]), y = scale(ay, state.sy, [h - m.b, m.t]);
+  const r = d3.scaleSqrt().domain([0, d3.max(C, c => c.Population2026)]).range([1.5, 28]);
+  const tickFmt = (a, k) => v => k === "YearlyChangePct" || k === "UrbanPopPct" ? pctU(v) : a.log ? (v >= 1e6 ? short(v) : v >= 1000 ? int(v / 1000) + " mil" : nf(v < 0.1 ? 2 : v < 1 ? 1 : 0).format(v)) : nf(Math.abs(v) < 10 && v % 1 ? 1 : 0).format(v);
+  // Escala log: solo 1 y 3 por potencia de 10 (o solo potencias si no caben).
+  const logTicks = sc => {
+    const [a, b] = sc.domain(), out = [];
+    for (let k = Math.floor(Math.log10(a)); k <= Math.ceil(Math.log10(b)); k++)
+      for (const mnt of [1, 3]) { const v = mnt * 10 ** k; if (v >= a && v <= b) out.push(v); }
+    return out.length > 7 ? out.filter(v => Math.log10(v) % 1 === 0) : out;
+  };
+  const yt = ay.log ? logTicks(y) : y.ticks(5);
+  const xt = ax.log ? logTicks(x) : x.ticks(6);
+  g.append("g").attr("class", "grid").selectAll("line").data(yt).join("line").attr("x1", m.l).attr("x2", w - m.r).attr("y1", y).attr("y2", y);
+  g.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickValues(xt).tickSize(0).tickFormat(tickFmt(ax, state.sx))).call(a => a.select(".domain").remove()).selectAll("text").attr("dy", "1.1em");
+  g.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(yt).tickSize(0).tickFormat(tickFmt(ay, state.sy))).call(a => a.select(".domain").remove()).selectAll("text").attr("dx", "-0.4em");
+  g.append("text").attr("class", "lbl-2").attr("x", w - m.r).attr("y", h - 4).attr("text-anchor", "end").text(ax.label + " →");
+  g.append("text").attr("class", "lbl-2").attr("x", m.l + 4).attr("y", m.t + 10).text("↑ " + ay.label);
+  const refs = [];
+  if (ax.ref != null && x.domain()[0] < ax.ref && ax.ref < x.domain()[1]) refs.push(["x", ax]);
+  if (ay.ref != null && y.domain()[0] < ay.ref && ay.ref < y.domain()[1]) refs.push(["y", ay]);
+  refs.forEach(([d, a]) => {
+    const line = g.append("line").attr("stroke", css("--ink-2")).attr("stroke-dasharray", "4 3");
+    if (d === "x") line.attr("x1", x(a.ref)).attr("x2", x(a.ref)).attr("y1", m.t).attr("y2", h - m.b);
+    else line.attr("x1", m.l).attr("x2", w - m.r).attr("y1", y(a.ref)).attr("y2", y(a.ref));
+    if (a.refLabel) g.append("text").attr("class", "lbl-2").attr("x", d === "x" ? x(a.ref) + 5 : w - m.r - 4).attr("y", d === "x" ? h - m.b - 8 : y(a.ref) - 5).attr("text-anchor", d === "x" ? "start" : "end").text(a.refLabel);
+  });
   g.append("g").selectAll("circle").data(data).join("circle").attr("class", "dot")
-    .attr("cx", c => x(c.FertilityRate)).attr("cy", c => y(c.MedianAge)).attr("r", c => r(c.Population2026))
+    .attr("cx", c => x(c[state.sx])).attr("cy", c => y(c[state.sy])).attr("r", c => r(c.Population2026))
     .classed("faded", c => !inFilter(c)).classed("sel", c => c.ISO3 === state.sel)
     .on("pointermove", (e, c) => scatterTip(e, c)).on("pointerleave", () => sTip.attr("hidden", true))
     .on("click", (e, c) => select(c.ISO3));
-  const lab = ["IND", "CHN", "NGA", "JPN", "KOR", "NER", "USA"].map(i => byIso.get(i)).filter(inFilter);
-  if (state.sel && !lab.some(c => c.ISO3 === state.sel)) lab.push(byIso.get(state.sel));
+  const lab = ["IND", "CHN", "NGA", "USA", "NER"].map(i => byIso.get(i)).filter(c => c && ok(c) && inFilter(c));
+  if (state.sel && ok(byIso.get(state.sel)) && !lab.some(c => c.ISO3 === state.sel)) lab.push(byIso.get(state.sel));
   g.append("g").selectAll("text").data(lab).join("text").attr("class", "lbl").style("font-weight", 600)
-    .attr("x", c => x(c.FertilityRate) + r(c.Population2026) * 0.7 + 4).attr("y", c => y(c.MedianAge) - r(c.Population2026) * 0.7 - 2)
+    .attr("text-anchor", c => x(c[state.sx]) > w - 120 ? "end" : "start")
+    .attr("x", c => x(c[state.sx]) > w - 120 ? x(c[state.sx]) - r(c.Population2026) * 0.7 - 4 : x(c[state.sx]) + r(c.Population2026) * 0.7 + 4).attr("y", c => Math.max(m.t + 24, y(c[state.sy]) - r(c.Population2026) * 0.7 - 2))
     .text(c => c.Country).style("pointer-events", "none");
+  const vis = data.filter(inFilter);
+  const rho = vis.length > 5 ? spearman(vis.map(c => c[state.sx]), vis.map(c => c[state.sy])) : NaN;
+  const strength = Math.abs(rho) >= 0.7 ? "fuerte" : Math.abs(rho) >= 0.4 ? "moderada" : "débil";
+  const bare = a => a.label.replace(/ \(.*\)/, "");
+  const lower = t => /^[A-ZÁÉÍÓÚ]{2}/.test(t) ? t : t[0].toLowerCase() + t.slice(1);
+  d3.select("#scTitle").text(`${bare(ay)} contra ${lower(bare(ax))}`);
+  d3.select("#corr").html(Number.isNaN(rho) ? "Pocos países con dato para medir la relación." :
+    `${vis.length} países con dato · correlación de rangos <b class="num">${signed(rho, 2)}</b>, relación ${strength} ${rho < 0 ? "inversa" : "directa"}. Correlación no es causalidad.`);
 }
 const sTip = d3.select(document.body).append("div").attr("class", "tip").attr("hidden", true).style("position", "fixed");
 function scatterTip(e, c) {
-  sTip.attr("hidden", null).html(`<b>${c.Country}</b><div class="row"><span>Fecundidad</span><span>${nf(2).format(c.FertilityRate)}</span></div><div class="row"><span>Edad mediana</span><span>${nf(1).format(c.MedianAge)}</span></div><div class="row"><span>Población</span><span>${short(c.Population2026)}</span></div>`);
+  const row = (l, v) => `<div class="row"><span>${l}</span><span>${v}</span></div>`;
+  sTip.attr("hidden", null).html(`<b>${c.Country}</b>` + row(AXES[state.sx].label, AXES[state.sx].fmt(c[state.sx])) + row(AXES[state.sy].label, AXES[state.sy].fmt(c[state.sy])) + row("Población", short(c.Population2026)));
   const t = sTip.node();
   let xx = e.clientX + 14, yy = e.clientY + 14;
   if (xx + t.offsetWidth > innerWidth) xx = e.clientX - t.offsetWidth - 14;
@@ -633,6 +764,9 @@ const COLS = [
   ["Population2026", "Población", int], ["YearlyChangePct", "Cambio %", v => pct(v)], ["NetChange", "Crec. neto", v => signed(v)],
   ["NetMigrants", "Migración", v => signed(v)], ["LandAreaKm2", "Superficie km²", int], ["DensityPerKm2", "Hab/km²", int], ["FertilityRate", "Fecundidad", v => nf(2).format(v)],
   ["MedianAge", "Edad med.", v => nf(1).format(v)], ["UrbanPopPct", "Urbana", v => v == null ? "—" : pctU(v)],
+  ["IncomeGroup", "Ingreso", v => v ? INC_ES[v] : "—"], ["GdpPcPpp", "PIB pc (PPA)", v => v == null ? "—" : usd(v)],
+  ["GdpGrowth", "PIB 2026", v => v == null ? "—" : signed(v, 1) + " %"], ["GdpPcGrowth", "Ingreso p/p", v => v == null ? "—" : signed(v, 1) + " %"],
+  ["LifeExpectancy", "Esp. vida", v => v == null ? "—" : nf(1).format(v)],
 ];
 d3.select("#tbl thead tr").selectAll("th").data(COLS).join("th").attr("tabindex", 0).text(d => d[1])
   .on("click keydown", (e, d) => {
@@ -657,7 +791,8 @@ function renderTable() {
 // ---------- Render ----------
 function render() {
   contBox.selectAll("button").attr("aria-pressed", d => String(d === state.cont));
-  d3.select("#metricSeg").selectAll("button").attr("aria-pressed", d => String(d[0] === state.metric));
+  d3.select("#metricSel").property("value", state.metric);
+  incBox.selectAll("button").attr("aria-pressed", d => String(d === state.inc));
   kpis(); renderMap(); renderCard(); renderSim(); renderScatter(); renderTable();
 }
 insights();

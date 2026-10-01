@@ -28,9 +28,26 @@ continente, tooltips por país y tarjetas que se recalculan con la selección.
 ## Atlas interactivo
 
 [`web/index.html`](web/index.html) es una página que se abre en cualquier navegador,
-sin servidor ni Power BI. Tiene el mapa con 8 indicadores, filtros por continente,
+sin servidor ni Power BI. Tiene el mapa con 18 indicadores de población y economía, filtros por continente y nivel de ingreso,
 la ficha de cada país, un simulador que proyecta la población con la tasa actual y la
 tabla completa ordenable. Se regenera con `python web/construir.py`.
+
+## Datos económicos que se actualizan solos
+
+`datos_economicos.py` baja del **Banco Mundial** (último año publicado por país) y del
+**FMI** (estimaciones y proyecciones 2026) el PIB per cápita, el crecimiento, la
+inflación, la deuda, la esperanza de vida, las remesas, el desempleo juvenil, la
+dependencia y el Gini. Cada valor viaja con su año, y las cifras del FMI de más de dos
+años se descartan, para que nada viejo pase por actual. Un flujo de GitHub Actions lo
+corre el día 5 de cada mes y guarda `datos/economia.csv` si algo cambió.
+
+Lo que agrega al análisis:
+
+- Los países de ingreso bajo y medio-bajo tienen el **45 %** de la población y aportan el
+  **85 %** de su crecimiento. Los de ingreso alto, el 17 % y el 3 %.
+- En **20 países** (488 M de personas) la población crece más rápido que la economía en
+  2026: el ingreso por persona cae.
+- Riqueza y fecundidad tienen una correlación de rangos de **−0,80** en 198 países.
 
 ## Por qué el mapa no miente
 

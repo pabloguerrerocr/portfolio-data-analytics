@@ -1,8 +1,9 @@
 """Arma web/index.html: el atlas interactivo con datos y mapa incrustados.
 
-Corre después de preparar_datos.py. Descarga los límites de Natural Earth
-1:110m (no se versionan), los simplifica y los mete en la página junto con
-la tabla limpia, para que index.html funcione abierto sin servidor.
+Corre después de preparar_datos.py y datos_economicos.py. Descarga los
+límites de Natural Earth 1:110m (no se versionan), los simplifica y los mete
+en la página junto con las tablas limpias, para que index.html funcione
+abierto sin servidor.
 """
 
 import json
@@ -46,10 +47,22 @@ def geografia():
     return {"type": "FeatureCollection", "features": feats}
 
 
+# Indicadores económicos (datos_economicos.py) que usa la página. Cada uno
+# viaja con su año para que el tooltip diga de cuándo es el dato.
+ECONOMIA = ["GdpPcPpp", "GdpGrowth", "LifeExpectancy", "RemittancesPctGdp",
+            "YouthUnemployment", "DependencyRatio", "Inflation", "PublicDebtPctGdp", "Gini"]
+
+
 def main():
     df = pd.read_csv(RAIZ / "datos" / "poblacion_mundial_2026.csv")[COLUMNAS]
+    eco = pd.read_csv(RAIZ / "datos" / "economia.csv")
+    eco_cols = [c for e in ECONOMIA for c in (e, e + "Year")] + ["GdpPcGrowth", "IncomeGroup"]
+    df = df.merge(eco[["ISO3", *eco_cols]], on="ISO3", how="left", validate="1:1")
+    for c in eco_cols:
+        if c.endswith("Year"):
+            df[c] = df[c].astype("Int64")
     filas = df.astype(object).where(df.notna(), None).values.tolist()
-    datos = {"cols": COLUMNAS, "rows": filas}
+    datos = {"cols": list(df.columns), "rows": filas}
 
     html = (DIR / "plantilla.html").read_text(encoding="utf-8")
     html = html.replace("/*GEO*/null", json.dumps(geografia(), separators=(",", ":")))
