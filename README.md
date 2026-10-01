@@ -87,4 +87,4 @@ verificados antes de graficar.
 
 ---
 
-📍 Costa Rica · Español nativo, inglés C1 · [LinkedIn](https://linkedin.com/in/pabloguerrerocr)
+📍 Costa Rica · Español nativo, inglés C1 · [LinkedIn](https://linkedin.com/in/pabloguerrerocr) · pabloguerrerocr@gmail.com
