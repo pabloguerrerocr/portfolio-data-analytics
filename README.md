@@ -2,6 +2,8 @@
 
 *[English version](README.en.md)*
 
+**[Explorar el tablero interactivo →](https://pabloguerrerocr.github.io/nowcast/)** Elegí el período y mirá cómo cambia la ventaja del modelo.
+
 **El referente ingenuo es difícil de vencer, y casi nadie lo reporta.**
 
 Estimar el crecimiento del PIB antes de que se publique la cifra oficial, con
@@ -46,6 +48,14 @@ python nowcasting-pib/nowcast.py
 ```
 
 Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
+
+---
+
+## También en este repositorio
+
+**[Población mundial 2026](poblacion-mundial/)** ([atlas interactivo](https://pabloguerrerocr.github.io/atlas/)): África tiene el 19 % de
+la población y aporta el 51 % del crecimiento. Mapa de 234 países con datos
+verificados antes de graficar.
 
 ---
 

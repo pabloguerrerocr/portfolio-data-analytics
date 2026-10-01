@@ -1,0 +1,107 @@
+// Medidas DAX para la tabla "Poblacion".
+// Modelado > Nueva medida > pegar una por una (cada bloque es una medida).
+// Todas responden a los filtros: elegir un continente en el segmentador
+// recalcula tarjetas, mapas y tooltips.
+
+Población total =
+SUM ( Poblacion[Population2026] )
+
+Población 2025 =
+SUM ( Poblacion[Population2025] )
+
+Crecimiento neto =
+SUM ( Poblacion[NetChange] )
+
+// Tasa ponderada por población. Promediar YearlyChangePct le daría a
+// Tuvalu el mismo peso que a India.
+Cambio anual % =
+DIVIDE ( [Crecimiento neto], [Población 2025] )
+
+// Calculada desde la población, no desde WorldSharePct: la fuente redondea
+// la cuota (China figura con 17 %, el valor exacto es 17,03 %).
+Cuota mundial % =
+DIVIDE (
+    [Población total],
+    CALCULATE ( [Población total], REMOVEFILTERS ( Poblacion ) )
+)
+
+Cuota del crecimiento mundial % =
+DIVIDE (
+    [Crecimiento neto],
+    CALCULATE ( [Crecimiento neto], REMOVEFILTERS ( Poblacion ) )
+)
+
+Migración neta =
+SUM ( Poblacion[NetMigrants] )
+
+// Nacimientos menos muertes = cambio neto menos migración.
+Crecimiento natural =
+SUM ( Poblacion[NaturalIncrease] )
+
+Densidad (hab/km²) =
+DIVIDE ( [Población total], SUM ( Poblacion[LandAreaKm2] ) )
+
+Fecundidad ponderada =
+DIVIDE (
+    SUMX ( Poblacion, Poblacion[FertilityRate] * Poblacion[Population2026] ),
+    [Población total]
+)
+
+Edad mediana ponderada =
+DIVIDE (
+    SUMX ( Poblacion, Poblacion[MedianAge] * Poblacion[Population2026] ),
+    [Población total]
+)
+
+// Solo países con dato: 24 territorios no publican población urbana.
+Urbanización % =
+DIVIDE (
+    SUMX (
+        FILTER ( Poblacion, NOT ISBLANK ( Poblacion[UrbanPopPct] ) ),
+        Poblacion[UrbanPopPct] * Poblacion[Population2026]
+    ),
+    CALCULATE (
+        [Población total],
+        NOT ISBLANK ( Poblacion[UrbanPopPct] )
+    )
+)
+
+Países que se achican =
+CALCULATE ( COUNTROWS ( Poblacion ), Poblacion[NetChange] < 0 )
+
+// Bajo 2,1 hijos por mujer una población no se reemplaza sin migración.
+% bajo reemplazo =
+DIVIDE (
+    CALCULATE ( [Población total], Poblacion[FertilityRate] < 2.1 ),
+    [Población total]
+)
+
+// Título dinámico para el mapa: cambia con el segmentador de continente.
+Título del mapa =
+VAR Seleccion =
+    IF (
+        ISFILTERED ( Poblacion[Continent] ),
+        CONCATENATEX ( VALUES ( Poblacion[Continent] ), Poblacion[Continent], ", " ),
+        "Mundo"
+    )
+RETURN
+    Seleccion & ": " & FORMAT ( [Población total] / 1e6, "#,0" ) & " M de personas, "
+        & FORMAT ( [Cambio anual %], "+0.00%;-0.00%" ) & " anual"
+
+// Color divergente para la coropleta (formato condicional > Valor de campo).
+// Azul = se achica, gris = estable, rojo = crece. Mismos colores que la
+// vista previa en graficos/mapa_crecimiento.png.
+Color cambio anual =
+VAR c = [Cambio anual %]
+RETURN
+    SWITCH (
+        TRUE (),
+        ISBLANK ( c ), "#D9D8D4",
+        c < -0.01, "#104281",
+        c < -0.005, "#5598E7",
+        c < 0, "#CDE2FB",
+        c < 0.005, "#F0EFEC",
+        c < 0.01, "#F6C4C3",
+        c < 0.02, "#E34948",
+        "#9C2423"
+    )

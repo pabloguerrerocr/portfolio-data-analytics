@@ -1,0 +1,805 @@
+<title>Atlas de Población 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: mesa de atlas. Cifras arriba, mapa grande con ficha del país al lado,
+   luego herramientas de análisis (hallazgos, simulador, dispersión) y la tabla completa.
+   Colores y tipografías: los mismos del sitio pabloguerrerocr.github.io. */
+:root {
+  --bg: #f4f5f6;
+  --surface: #ffffff;
+  --ink: #12243a;
+  --ink-2: #3d4a59;
+  --muted: #5d666f;
+  --line: #d7dade;
+  --accent: #a8621a;
+  --accent-soft: #f5ebe0;
+  --nodata: #d6dbe0;
+  --land: #e4e8ec;
+  --dot: #1b4f8a;
+  --neg2: #104281; --neg1: #6da7ec; --mid: #eceae6; --pos1: #ef8c8b; --pos2: #9c2423;
+  --seq0: #e3eefb; --seq1: #9ec5f4; --seq2: #3987e5; --seq3: #1c5cab; --seq4: #0d366b;
+  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1319; --surface: #161c24; --ink: #dfe6ee; --ink-2: #b5c0cc; --muted: #95a0ac;
+    --line: #2c353f; --accent: #e0995a; --accent-soft: #2e2318; --nodata: #2a333d; --land: #222b34;
+    --dot: #7fb3e8;
+    --neg2: #3987e5; --neg1: #24497a; --mid: #383835; --pos1: #7a2d2d; --pos2: #e66767;
+    --seq0: #1b2938; --seq1: #1c4475; --seq2: #2a6fc4; --seq3: #6da7ec; --seq4: #cde2fb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1319; --surface: #161c24; --ink: #dfe6ee; --ink-2: #b5c0cc; --muted: #95a0ac;
+  --line: #2c353f; --accent: #e0995a; --accent-soft: #2e2318; --nodata: #2a333d; --land: #222b34;
+  --dot: #7fb3e8;
+  --neg2: #3987e5; --neg1: #24497a; --mid: #383835; --pos1: #7a2d2d; --pos2: #e66767;
+  --seq0: #1b2938; --seq1: #1c4475; --seq2: #2a6fc4; --seq3: #6da7ec; --seq4: #cde2fb;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 4.4vw, 48px); font-weight: 500; line-height: 1.05; letter-spacing: -0.02em; }
+h2 { font-size: 23px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 68ch; }
+.num { font-variant-numeric: tabular-nums; }
+button, input, select { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: grid; gap: 10px; }
+
+/* Filtros */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13.5px; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.kpi { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
+.kpi .v { font-family: var(--mono); font-size: 24px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.kpi .l { font-size: 12.5px; color: var(--ink-2); }
+@media (max-width: 960px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi .v { font-size: 22px; } }
+
+/* Mapa + ficha */
+.atlas { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .atlas { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.maptools { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button { border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 4px 10px; font-size: 13px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.filters .flabel { font-size: 12px; color: var(--muted); min-width: 64px; }
+.selbox { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; max-width: 100%; }
+.yr { color: var(--muted); font-size: 11px; }
+.card-sec { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.pill { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-size: 11.5px; color: var(--ink-2); }
+.corr { font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; }
+.axes { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 8px; }
+.toggle { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.mapbox { position: relative; }
+#map { width: 100%; height: auto; display: block; touch-action: none; cursor: grab; }
+#map:active { cursor: grabbing; }
+.country { stroke: var(--surface); stroke-width: 0.5; vector-effect: non-scaling-stroke; cursor: pointer; transition: opacity .2s; }
+.country:hover { stroke: var(--ink); stroke-width: 1.2; }
+.country.sel { stroke: var(--ink); stroke-width: 2; }
+.bubble { fill: var(--ink); fill-opacity: 0.16; stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 0.8; vector-effect: non-scaling-stroke; cursor: pointer; transition: opacity .2s; }
+.bubble:hover, .bubble.sel { fill-opacity: 0.32; stroke-opacity: 1; stroke-width: 1.6; }
+.faded { opacity: 0.18; }
+.zoom { position: absolute; right: 8px; top: 8px; display: grid; gap: 4px; }
+.zoom button { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 16px; line-height: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin-top: 8px; font-size: 12.5px; color: var(--ink-2); }
+#legendSvg { width: min(420px, 100%); height: 36px; overflow: visible; }
+.hint { font-size: 12.5px; color: var(--muted); }
+
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 6px 20px rgb(0 0 0 / 0.14); min-width: 170px; z-index: 5; }
+.tip b { font-family: var(--display); font-size: 14px; display: block; margin-bottom: 2px; }
+.tip .row { display: flex; justify-content: space-between; gap: 14px; color: var(--ink-2); }
+.tip .row span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* Ficha */
+.card-head { display: grid; gap: 2px; margin-bottom: 12px; }
+.card-head .big { font-family: var(--mono); font-size: 32px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.stat { display: grid; gap: 0; min-width: 0; }
+.stat .l { font-size: 12px; color: var(--muted); }
+.stat .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.decomp { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.decomp svg { width: 100%; height: 64px; display: block; overflow: visible; }
+.mini-note { font-size: 12px; color: var(--muted); }
+.linkish { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
+
+/* Hallazgos */
+.insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 980px) { .insights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .insights { grid-template-columns: minmax(0, 1fr); } }
+.insight { display: grid; gap: 6px; align-content: start; text-align: left; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.insight:hover { border-color: var(--accent); }
+.insight .v { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.insight p { font-size: 13.5px; color: var(--ink-2); }
+.insight .go { font-size: 12.5px; color: var(--accent); font-weight: 600; }
+
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 980px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.sec-head { display: grid; gap: 4px; margin-bottom: 12px; }
+.sec-head p { color: var(--ink-2); font-size: 13.5px; }
+
+/* Simulador */
+.sim-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px; }
+#year { flex: 1 1 200px; accent-color: var(--accent); }
+.yearv { font-family: var(--mono); font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 70px; }
+.sim-total { font-size: 13.5px; color: var(--ink-2); margin-bottom: 8px; }
+#simSvg, #scatter { width: 100%; height: auto; display: block; overflow: visible; }
+.axis text { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
+.axis line, .axis path { stroke: var(--line); }
+.grid line { stroke: var(--line); stroke-dasharray: 2 3; }
+.lbl { fill: var(--ink); font-size: 12px; }
+.lbl-2 { fill: var(--ink-2); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.up { fill: #0ca30c; } .down { fill: #d03b3b; }
+.dot { fill: var(--dot); fill-opacity: 0.55; stroke: var(--surface); stroke-width: 1; cursor: pointer; transition: opacity .2s; }
+.dot.sel { stroke: var(--ink); stroke-width: 2.2; fill-opacity: 0.9; }
+
+/* Tabla */
+.tbl-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+#q { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 10px; min-width: 0; width: min(280px, 100%); }
+.tbl-scroll { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 1300px; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:nth-child(-n+3), td:nth-child(-n+3) { text-align: left; }
+thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-weight: 600; font-size: 12px; color: var(--ink-2); cursor: pointer; user-select: none; }
+thead th[aria-sort="ascending"]::after { content: " ▲"; font-size: 9px; }
+thead th[aria-sort="descending"]::after { content: " ▼"; font-size: 9px; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--accent-soft); }
+tbody tr.sel { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+footer { color: var(--muted); font-size: 12.5px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Atlas de población y economía · 234 países y territorios · 2026</span>
+    <h1 id="headline">El mundo suma 69 millones de personas al año, y la mitad nace en África</h1>
+    <p class="lede">Elige uno de 18 indicadores demográficos y económicos para colorear el mapa, filtra por continente o nivel de ingreso y toca cualquier país para ver su ficha. Todas las cifras se recalculan con el filtro.</p>
+  </header>
+
+  <div style="display:grid;gap:8px">
+    <div class="filters" id="contFilters" role="group" aria-label="Filtrar por continente"><span class="flabel">Continente</span></div>
+    <div class="filters" id="incFilters" role="group" aria-label="Filtrar por nivel de ingreso"><span class="flabel">Ingreso</span></div>
+  </div>
+
+  <section class="kpis" id="kpis" aria-label="Resumen"></section>
+
+  <section class="atlas">
+    <div class="panel">
+      <div class="maptools">
+        <label class="selbox" for="metricSel">Colorear por <select id="metricSel"></select></label>
+        <label class="toggle" for="bubbles"><input type="checkbox" id="bubbles" checked> Burbujas de población</label>
+      </div>
+      <div class="mapbox" id="mapbox">
+        <svg id="map" viewBox="0 0 960 470" role="img" aria-label="Mapa mundial coloreado por el indicador elegido"></svg>
+        <div class="zoom">
+          <button id="zin" aria-label="Acercar">+</button>
+          <button id="zout" aria-label="Alejar">−</button>
+          <button id="zreset" aria-label="Restablecer vista" style="font-size:12px">⟲</button>
+        </div>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <div class="legend">
+        <svg id="legendSvg"></svg>
+        <span id="legendNote"></span>
+      </div>
+      <p class="hint">Arrastra para mover el mapa. Usa + y − o Ctrl + rueda para acercar. Los territorios muy chicos aparecen solo como burbuja.</p>
+    </div>
+
+    <aside class="panel" id="card" aria-live="polite"></aside>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Lo que dicen los datos</h2>
+      <p>Toca un hallazgo para ver la evidencia en el mapa.</p>
+    </div>
+    <div class="insights" id="insights"></div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <div class="sec-head">
+        <h2>Simulador: ¿y si nada cambiara?</h2>
+        <p>Proyecta cada país con su tasa de 2026 constante. No es un pronóstico: sirve para ver qué implica el ritmo de hoy.</p>
+      </div>
+      <div class="sim-controls">
+        <span class="yearv" id="yearv">2040</span>
+        <input type="range" id="year" min="2026" max="2060" step="1" value="2040" aria-label="Año de la proyección">
+      </div>
+      <p class="sim-total" id="simTotal"></p>
+      <svg id="simSvg" viewBox="0 0 560 360"></svg>
+    </div>
+    <div class="panel">
+      <div class="sec-head">
+        <h2 id="scTitle">Riqueza contra fecundidad</h2>
+        <p>Cada círculo es un país, con área proporcional a su población. Cambia los ejes para cruzar cualquier par de indicadores.</p>
+      </div>
+      <div class="axes">
+        <label class="selbox" for="xSel">Eje X <select id="xSel"></select></label>
+        <label class="selbox" for="ySel">Eje Y <select id="ySel"></select></label>
+      </div>
+      <p class="corr" id="corr"></p>
+      <svg id="scatter" viewBox="0 0 560 400"></svg>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="tbl-tools">
+      <div class="sec-head" style="margin:0">
+        <h2>Todos los países</h2>
+        <p id="tblCount"></p>
+      </div>
+      <input id="q" type="search" placeholder="Buscar país…" aria-label="Buscar país">
+    </div>
+    <div class="tbl-scroll">
+      <table id="tbl"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <footer>
+    <p>Población: Worldometer, estimaciones 2026 basadas en <i>World Population Prospects</i> de la ONU. Economía: Banco Mundial (<i>World Development Indicators</i>, último año disponible por país) y FMI (<i>World Economic Outlook</i>, 2026). Cada dato económico muestra su año. Límites: Natural Earth 1:110m.</p>
+    <p>Las tasas de grupos se ponderan por población: un promedio simple le daría a Tuvalu el mismo peso que a India. El crecimiento del ingreso por persona es el PIB real 2026 del FMI menos el crecimiento de la población. Los territorios sin dato económico aparecen en gris.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const GEO = /*GEO*/null;
+const RAW = /*DATA*/null;
+
+// ---------- Datos ----------
+const C = RAW.rows.map(r => Object.fromEntries(RAW.cols.map((k, i) => [k, r[i]])));
+C.forEach(c => {
+  c.Pop2025 = c.Population2026 - c.NetChange;
+  c.migRate = c.NetMigrants / c.Population2026 * 1000;
+});
+const byIso = new Map(C.map(c => [c.ISO3, c]));
+const GEO_ALIAS = { SOL: "SOM", CYN: "CYP" }; // Somalilandia y Chipre del Norte
+const WORLD_POP = d3.sum(C, c => c.Population2026);
+const WORLD_NET = d3.sum(C, c => c.NetChange);
+const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "South America", "Oceania"];
+const INCOMES = ["Low income", "Lower middle income", "Upper middle income", "High income"];
+const INC_ES = { "Low income": "Bajo", "Lower middle income": "Medio-bajo", "Upper middle income": "Medio-alto", "High income": "Alto" };
+const CONT_ES = { "Africa": "África", "Asia": "Asia", "Europe": "Europa", "North America": "Norte y Centroamérica", "South America": "Sudamérica", "Oceania": "Oceanía" };
+
+// ---------- Formato (es: punto de miles, coma decimal) ----------
+const nf = (d, opts = {}) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: d, minimumFractionDigits: d, ...opts });
+const int = v => nf(0).format(v);
+const signed = (v, d = 0) => (v > 0 ? "+" : v < 0 ? "−" : "") + nf(d).format(Math.abs(v));
+const pct = (v, d = 2) => v == null ? "—" : signed(v * 100, d) + " %";
+const pctU = (v, d = 0) => v == null ? "—" : nf(d).format(v * 100) + " %";
+function short(v) {
+  const a = Math.abs(v), s = v < 0 ? "−" : "";
+  if (a >= 1e9) return s + nf(2).format(a / 1e9) + " mil M";
+  if (a >= 1e6) return s + nf(a >= 1e8 ? 0 : 1).format(a / 1e6) + " M";
+  if (a >= 1e3) return s + nf(a >= 1e5 ? 0 : 1).format(a / 1e3) + " mil";
+  return s + int(a);
+}
+const shortS = v => (v > 0 ? "+" : "") + short(v);
+
+// ---------- Indicadores ----------
+const usd = v => "$" + int(v);
+const METRICS = {
+  change:  { label: "Cambio anual", get: c => c.YearlyChangePct, type: "div", domain: [-0.02, 0, 0.035], ticks: [-0.02, -0.01, 0, 0.01, 0.02, 0.03], fmt: v => pct(v, 2), tick: v => signed(v * 100) + "%", note: "Azul: pierde población · rojo: gana" },
+  fert:    { label: "Fecundidad", get: c => c.FertilityRate, type: "div", domain: [0.7, 2.1, 6], ticks: [1, 2.1, 3, 4, 5, 6], fmt: v => nf(2).format(v) + " hijos", tick: v => nf(v === 2.1 ? 1 : 0).format(v), note: "Hijos por mujer. Gris = 2,1, el nivel de reemplazo" },
+  mig:     { label: "Migración", get: c => c.migRate, type: "div", domain: [-8, 0, 8], ticks: [-8, -4, 0, 4, 8], fmt: v => signed(v, 1) + " por mil", tick: v => signed(v), note: "Migrantes netos por cada mil habitantes. Rojo: llegan más de los que se van" },
+  age:     { label: "Edad mediana", get: c => c.MedianAge, type: "seq", domain: [15, 55], ticks: [15, 25, 35, 45, 55], fmt: v => nf(1).format(v) + " años", tick: v => int(v), note: "Años. La mitad de la población es más joven que esta edad" },
+  density: { label: "Densidad", get: c => c.DensityPerKm2 || null, type: "seq", log: true, domain: [1, 3000], ticks: [1, 10, 100, 1000], fmt: v => int(v) + " hab/km²", tick: v => int(v), note: "Habitantes por km², escala logarítmica" },
+  area:    { label: "Superficie", get: c => c.LandAreaKm2 || null, type: "seq", log: true, domain: [1e3, 1.7e7], ticks: [1e3, 1e4, 1e5, 1e6, 1e7], fmt: v => int(v) + " km²", tick: v => v >= 1e6 ? int(v / 1e6) + " M" : v >= 1e3 ? int(v / 1e3) + " mil" : int(v), note: "Superficie terrestre en km², escala logarítmica" },
+  urban:   { label: "Urbanización", get: c => c.UrbanPopPct, type: "seq", domain: [0.1, 1], ticks: [0.2, 0.4, 0.6, 0.8, 1], fmt: v => pctU(v, 1), tick: v => pctU(v), note: "Porcentaje que vive en ciudades. Gris: sin dato" },
+  pop:     { label: "Población", get: c => c.Population2026, type: "seq", log: true, domain: [1e4, 1.5e9], ticks: [1e4, 1e5, 1e6, 1e7, 1e8, 1e9], fmt: v => short(v), tick: v => short(v).replace(" mil M", "B"), note: "Personas, escala logarítmica" },
+  gdppc:   { eco: true, label: "PIB per cápita", get: c => c.GdpPcPpp, yk: "GdpPcPppYear", type: "seq", log: true, domain: [1000, 120000], ticks: [1000, 3000, 10000, 30000, 100000], fmt: usd, tick: v => v >= 1000 ? int(v / 1000) + " mil" : int(v), note: "Dólares internacionales de 2021 (PPA), escala logarítmica. Banco Mundial" },
+  pcgrow:  { eco: true, label: "Ingreso por persona 2026", get: c => c.GdpPcGrowth, type: "div", domain: [-4, 0, 6], ticks: [-4, -2, 0, 2, 4, 6], fmt: v => signed(v, 1) + " %", tick: v => signed(v) + "%", note: "Crecimiento del PIB real menos el de la población. Azul: cada persona tiene menos" },
+  growth:  { eco: true, label: "Crecimiento del PIB", get: c => c.GdpGrowth, yk: "GdpGrowthYear", type: "div", domain: [-4, 0, 8], ticks: [-4, 0, 4, 8], fmt: v => signed(v, 1) + " %", tick: v => signed(v) + "%", note: "PIB real, estimación o proyección del FMI para 2026" },
+  life:    { eco: true, label: "Esperanza de vida", get: c => c.LifeExpectancy, yk: "LifeExpectancyYear", type: "seq", domain: [55, 85], ticks: [55, 65, 75, 85], fmt: v => nf(1).format(v) + " años", tick: v => int(v), note: "Años al nacer. Banco Mundial" },
+  dep:     { eco: true, label: "Dependencia", get: c => c.DependencyRatio, yk: "DependencyRatioYear", type: "seq", domain: [20, 100], ticks: [20, 40, 60, 80, 100], fmt: v => nf(0).format(v) + " por 100", tick: v => int(v), note: "Menores de 15 y mayores de 64 por cada 100 personas en edad de trabajar" },
+  remit:   { eco: true, label: "Remesas", get: c => c.RemittancesPctGdp || null, yk: "RemittancesPctGdpYear", type: "seq", log: true, domain: [0.1, 40], ticks: [0.1, 1, 10, 40], fmt: v => nf(1).format(v) + " % del PIB", tick: v => nf(v < 1 ? 1 : 0).format(v) + "%", note: "Dinero que envían los emigrantes, % del PIB, escala logarítmica" },
+  youth:   { eco: true, label: "Desempleo juvenil", get: c => c.YouthUnemployment, yk: "YouthUnemploymentYear", type: "seq", domain: [0, 50], ticks: [0, 10, 20, 30, 40, 50], fmt: v => nf(1).format(v) + " %", tick: v => int(v) + "%", note: "15 a 24 años, % de la fuerza laboral (estimación de la OIT)" },
+  infl:    { eco: true, label: "Inflación", get: c => c.Inflation, yk: "InflationYear", type: "div", domain: [-2, 3, 15], ticks: [-2, 0, 3, 6, 9, 12, 15], fmt: v => signed(v, 1) + " %", tick: v => int(v) + "%", note: "Promedio anual, FMI. Gris = 3 %; 15 % o más, mismo rojo" },
+  debt:    { eco: true, label: "Deuda pública", get: c => c.PublicDebtPctGdp, yk: "PublicDebtPctGdpYear", type: "seq", domain: [0, 150], ticks: [0, 50, 100, 150], fmt: v => nf(0).format(v) + " % del PIB", tick: v => int(v) + "%", note: "Deuda bruta del gobierno general, % del PIB. FMI" },
+  gini:    { eco: true, label: "Desigualdad (Gini)", get: c => c.Gini, yk: "GiniYear", type: "seq", domain: [25, 55], ticks: [25, 35, 45, 55], fmt: v => nf(1).format(v), tick: v => int(v), note: "0 = igualdad total, 100 = máxima desigualdad. Banco Mundial" },
+};
+const yearOf = (m, c) => m.yk && c[m.yk] ? ` <span class="yr">(${c[m.yk]})</span>` : "";
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let colorOf;
+function buildScale() {
+  const m = METRICS[state.metric];
+  const tf = m.log ? Math.log10 : (v => v);
+  let dom, rng;
+  if (m.type === "div") {
+    const [a, mid, b] = m.domain;
+    dom = [a, (a + mid) / 2, mid, (mid + b) / 2, b];
+    rng = ["--neg2", "--neg1", "--mid", "--pos1", "--pos2"].map(css);
+  } else {
+    const [a, b] = m.domain.map(tf);
+    dom = d3.range(5).map(i => a + (b - a) * i / 4);
+    rng = ["--seq0", "--seq1", "--seq2", "--seq3", "--seq4"].map(css);
+  }
+  const s = d3.scaleLinear().domain(dom).range(rng).interpolate(d3.interpolateLab).clamp(true);
+  const nodata = css("--nodata");
+  colorOf = c => {
+    const v = c ? m.get(c) : null;
+    if (v == null || Number.isNaN(v)) return nodata;
+    return s(m.type === "div" ? v : tf(v));
+  };
+  colorOf.scale = s; colorOf.tf = m.type === "div" ? (v => v) : tf; colorOf.dom = dom;
+}
+
+// ---------- Estado ----------
+const state = { metric: "change", cont: null, inc: null, sx: "GdpPcPpp", sy: "FertilityRate", sel: null, bubbles: true, year: 2040, sort: { key: "Population2026", dir: -1 }, q: "" };
+const inFilter = c => (!state.cont || c.Continent === state.cont) && (!state.inc || c.IncomeGroup === state.inc);
+const filterName = () => [state.cont && CONT_ES[state.cont], state.inc && "ingreso " + INC_ES[state.inc].toLowerCase()].filter(Boolean).join(" · ") || "Mundo";
+
+// ---------- Filtros de continente ----------
+const contBox = d3.select("#contFilters");
+contBox.selectAll("button").data([null, ...CONTINENTS]).join("button")
+  .attr("class", "chip").text(d => d ? CONT_ES[d] : "Todo el mundo")
+  .on("click", (e, d) => { state.cont = d; render(); });
+const incBox = d3.select("#incFilters");
+incBox.selectAll("button").data([null, ...INCOMES]).join("button")
+  .attr("class", "chip").text(d => d ? INC_ES[d] : "Todos")
+  .on("click", (e, d) => { state.inc = d; render(); });
+
+// ---------- KPIs ----------
+function kpis() {
+  const s = C.filter(inFilter);
+  const pop = d3.sum(s, c => c.Population2026), net = d3.sum(s, c => c.NetChange);
+  const rate = net / (pop - net);
+  const shrinking = s.filter(c => c.NetChange < 0).length;
+  const below = d3.sum(s.filter(c => c.FertilityRate < 2.1), c => c.Population2026) / pop;
+  const age = d3.sum(s, c => c.MedianAge * c.Population2026) / pop;
+  const items = [
+    [short(pop), (state.cont || state.inc) ? `personas · ${pctU(pop / WORLD_POP, 1)} del mundo` : "personas en 2026"],
+    [shortS(net), "crecimiento neto en el año"],
+    [pct(rate), "cambio anual, ponderado"],
+    [pctU(net / WORLD_NET, 1), "del crecimiento mundial"],
+    [`${shrinking} de ${s.length}`, "países que pierden población"],
+    [pctU(below), `vive con fecundidad bajo 2,1 · edad mediana ${nf(1).format(age)}`],
+  ];
+  d3.select("#kpis").selectAll(".kpi").data(items).join(enter => {
+    const k = enter.append("div").attr("class", "kpi");
+    k.append("span").attr("class", "v"); k.append("span").attr("class", "l"); return k;
+  }).call(k => { k.select(".v").text(d => d[0]); k.select(".l").text(d => d[1]); });
+}
+
+// ---------- Mapa ----------
+const W = 960, H = 470;
+const svg = d3.select("#map");
+const projection = d3.geoNaturalEarth1().fitExtent([[4, 4], [W - 4, H - 4]], GEO);
+const path = d3.geoPath(projection);
+const gZoom = svg.append("g");
+const gLand = gZoom.append("g");
+const gBub = gZoom.append("g");
+const tip = d3.select("#tip");
+const mapbox = document.getElementById("mapbox");
+
+const geoCountry = f => byIso.get(GEO_ALIAS[f.id] || f.id);
+const paths = gLand.selectAll("path").data(GEO.features).join("path")
+  .attr("class", "country").attr("d", path)
+  .on("pointermove", (e, f) => showTip(e, geoCountry(f), f))
+  .on("pointerleave", hideTip)
+  .on("click", (e, f) => { const c = geoCountry(f); if (c) select(c.ISO3); });
+
+const rScale = d3.scaleSqrt().domain([0, d3.max(C, c => c.Population2026)]).range([0, 34]);
+C.forEach(c => { [c.px, c.py] = projection([c.Longitude, c.Latitude]); });
+const bubbles = gBub.selectAll("circle").data([...C].sort((a, b) => b.Population2026 - a.Population2026)).join("circle")
+  .attr("class", "bubble").attr("cx", c => c.px).attr("cy", c => c.py).attr("r", c => Math.max(1.2, rScale(c.Population2026)))
+  .on("pointermove", (e, c) => showTip(e, c))
+  .on("pointerleave", hideTip)
+  .on("click", (e, c) => select(c.ISO3));
+
+let zk = 1;
+const zoom = d3.zoom().scaleExtent([1, 12]).translateExtent([[0, 0], [W, H]])
+  .filter(e => (e.type !== "wheel" || e.ctrlKey) && !e.button)
+  .on("zoom", e => {
+    zk = e.transform.k;
+    gZoom.attr("transform", e.transform);
+    bubbles.attr("r", c => Math.max(1.2, rScale(c.Population2026)) / Math.sqrt(zk));
+  });
+svg.call(zoom);
+d3.select("#zin").on("click", () => svg.transition().duration(300).call(zoom.scaleBy, 1.6));
+d3.select("#zout").on("click", () => svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.6));
+d3.select("#zreset").on("click", () => svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
+
+function showTip(e, c, f) {
+  if (!c) { tip.attr("hidden", null).html(`<b>Sin dato</b><div class="row"><span>${f ? f.id : ""}</span></div>`); placeTip(e); return; }
+  const m = METRICS[state.metric];
+  const rows = [
+    [m.label, m.get(c) == null || Number.isNaN(m.get(c)) ? "sin dato" : m.fmt(m.get(c)) + yearOf(m, c)],
+    ["Población", short(c.Population2026)],
+    ["Cambio anual", pct(c.YearlyChangePct)],
+    ["Crecimiento neto", shortS(c.NetChange)],
+  ];
+  if (state.metric === "change") rows.shift();
+  tip.attr("hidden", null).html(`<b>${c.Country}</b>` + rows.map(r => `<div class="row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join(""));
+  placeTip(e);
+}
+function placeTip(e) {
+  const b = mapbox.getBoundingClientRect(), t = tip.node();
+  let x = e.clientX - b.left + 14, y = e.clientY - b.top + 14;
+  if (x + t.offsetWidth > b.width) x = e.clientX - b.left - t.offsetWidth - 14;
+  if (y + t.offsetHeight > b.height) y = e.clientY - b.top - t.offsetHeight - 14;
+  tip.style("left", Math.max(0, x) + "px").style("top", Math.max(0, y) + "px");
+}
+function hideTip() { tip.attr("hidden", true); }
+
+function renderMap() {
+  buildScale();
+  paths.attr("fill", f => colorOf(geoCountry(f)))
+    .classed("faded", f => { const c = geoCountry(f); return (state.cont || state.inc) && (!c || !inFilter(c)); })
+    .classed("sel", f => { const c = geoCountry(f); return c && c.ISO3 === state.sel; });
+  bubbles.attr("display", state.bubbles ? null : "none")
+    .classed("faded", c => !inFilter(c))
+    .classed("sel", c => c.ISO3 === state.sel);
+  if (state.sel) paths.filter(f => geoCountry(f)?.ISO3 === state.sel).raise();
+  renderLegend();
+}
+
+function renderLegend() {
+  const m = METRICS[state.metric];
+  const lg = d3.select("#legendSvg"), w = Math.min(420, lg.node().getBoundingClientRect().width || 420);
+  lg.selectAll("*").remove();
+  const tf = colorOf.tf, dom = colorOf.dom;
+  const x = d3.scaleLinear().domain([dom[0], dom[dom.length - 1]]).range([6, w - 14]);
+  const id = "lgGrad";
+  const grad = lg.append("defs").append("linearGradient").attr("id", id);
+  d3.range(0, 1.0001, 0.05).forEach(t => grad.append("stop").attr("offset", t).attr("stop-color", colorOf.scale(dom[0] + t * (dom[dom.length - 1] - dom[0]))));
+  lg.append("rect").attr("x", 6).attr("y", 4).attr("width", w - 20).attr("height", 10).attr("rx", 2).attr("fill", `url(#${id})`);
+  const t = lg.append("g").attr("class", "axis");
+  m.ticks.forEach(v => {
+    const px = x(tf(v));
+    t.append("line").attr("x1", px).attr("x2", px).attr("y1", 14).attr("y2", 18).attr("stroke", css("--muted"));
+    t.append("text").attr("x", px).attr("y", 30).attr("text-anchor", "middle").text(m.tick(v));
+  });
+  d3.select("#legendNote").text(m.note);
+}
+
+// Selector de indicador
+{
+  const sel = d3.select("#metricSel");
+  [["Población", false], ["Economía", true]].forEach(([g, eco]) => {
+    const og = sel.append("optgroup").attr("label", g);
+    Object.entries(METRICS).filter(([, m]) => !!m.eco === eco)
+      .forEach(([k, m]) => og.append("option").attr("value", k).text(m.label));
+  });
+  sel.on("change", e => { state.metric = e.target.value; render(); });
+}
+d3.select("#bubbles").on("change", e => { state.bubbles = e.target.checked; renderMap(); });
+
+// ---------- Ficha del país ----------
+function select(iso) { state.sel = state.sel === iso ? null : iso; render(); }
+
+function renderCard() {
+  const card = d3.select("#card");
+  const c = state.sel ? byIso.get(state.sel) : null;
+  if (!c) {
+    const s = C.filter(inFilter);
+    const pop = d3.sum(s, d => d.Population2026);
+    const agg = {
+      Country: filterName(),
+      sub: `${s.length} países y territorios`,
+      Population2026: pop, NetChange: d3.sum(s, d => d.NetChange), NetMigrants: d3.sum(s, d => d.NetMigrants),
+      NaturalIncrease: d3.sum(s, d => d.NaturalIncrease),
+      FertilityRate: d3.sum(s, d => d.FertilityRate * d.Population2026) / pop,
+      MedianAge: d3.sum(s, d => d.MedianAge * d.Population2026) / pop,
+      DensityPerKm2: pop / d3.sum(s, d => d.LandAreaKm2),
+      LandAreaKm2: d3.sum(s, d => d.LandAreaKm2),
+    };
+    agg.YearlyChangePct = agg.NetChange / (pop - agg.NetChange);
+    // PIB per cápita del grupo = PIB total / población (solo países con dato).
+    const g = s.filter(d => d.GdpPcPpp != null);
+    agg.GdpPcPpp = d3.sum(g, d => d.GdpPcPpp * d.Population2026) / d3.sum(g, d => d.Population2026);
+    const l = s.filter(d => d.LifeExpectancy != null);
+    agg.LifeExpectancy = d3.sum(l, d => d.LifeExpectancy * d.Population2026) / d3.sum(l, d => d.Population2026);
+    const u = s.filter(d => d.UrbanPopPct != null);
+    agg.UrbanPopPct = d3.sum(u, d => d.UrbanPopPct * d.Population2026) / d3.sum(u, d => d.Population2026);
+    return cardHtml(card, agg, true);
+  }
+  cardHtml(card, c, false);
+}
+
+function cardHtml(card, c, isAgg) {
+  const head = isAgg
+    ? `<span class="eyebrow">${c.sub}</span><h2>${c.Country}</h2>`
+    : `<span class="eyebrow">#${c.Rank} del mundo · ${CONT_ES[c.Continent]}</span><h2>${c.Country}</h2>`;
+  const stats = [
+    ["Cambio anual", pct(c.YearlyChangePct)],
+    ["Crecimiento neto", shortS(c.NetChange)],
+    ["Fecundidad", nf(2).format(c.FertilityRate) + (c.FertilityRate < 2.1 ? " · bajo reemplazo" : "")],
+    ["Edad mediana", nf(1).format(c.MedianAge) + " años"],
+    ["Densidad", int(c.DensityPerKm2) + " hab/km²"],
+    ["Superficie", int(c.LandAreaKm2) + " km²"],
+    ["Urbanización", c.UrbanPopPct == null || Number.isNaN(c.UrbanPopPct) ? "sin dato" : pctU(c.UrbanPopPct, 1)],
+    ["Del mundo", pctU(c.Population2026 / WORLD_POP, c.Population2026 / WORLD_POP < 0.001 ? 3 : 2)],
+  ];
+  card.html(`
+    <div class="card-head">${head}
+      <span class="big">${short(c.Population2026)}</span>
+      <span class="mini-note">${int(c.Population2026)} personas</span>
+    </div>
+    <div class="stats">${stats.map(s => `<div class="stat"><span class="l">${s[0]}</span><span class="v">${s[1]}</span></div>`).join("")}</div>
+    ${ecoHtml(c, isAgg)}
+    <div class="decomp">
+      <h3>De dónde viene el cambio</h3>
+      <svg id="decomp" viewBox="0 0 300 64"></svg>
+      <p class="mini-note">${decompNote(c)}</p>
+    </div>
+    ${isAgg ? `<p class="mini-note" style="margin-top:10px">Toca un país en el mapa, el gráfico o la tabla para ver su ficha.</p>`
+            : `<p style="margin-top:10px"><button class="linkish" id="clearSel">Volver a ${filterName()}</button></p>`}
+  `);
+  d3.select("#clearSel").on("click", () => { state.sel = null; render(); });
+  drawDecomp(c);
+}
+
+function ecoHtml(c, isAgg) {
+  const v = (k, f, yk) => c[k] == null || Number.isNaN(c[k]) ? "sin dato" : f(c[k]) + (yk && c[yk] ? ` <span class="yr">${c[yk]}</span>` : "");
+  const rows = isAgg
+    ? [["PIB per cápita (PPA)", v("GdpPcPpp", usd)], ["Esperanza de vida", v("LifeExpectancy", x => nf(1).format(x) + " años")]]
+    : [
+        ["PIB per cápita (PPA)", v("GdpPcPpp", usd, "GdpPcPppYear")],
+        ["Crecimiento del PIB", v("GdpGrowth", x => signed(x, 1) + " %", "GdpGrowthYear")],
+        ["Ingreso por persona 2026", v("GdpPcGrowth", x => signed(x, 1) + " %")],
+        ["Inflación", v("Inflation", x => signed(x, 1) + " %", "InflationYear")],
+        ["Esperanza de vida", v("LifeExpectancy", x => nf(1).format(x) + " años", "LifeExpectancyYear")],
+        ["Desempleo juvenil", v("YouthUnemployment", x => nf(1).format(x) + " %", "YouthUnemploymentYear")],
+        ["Remesas", v("RemittancesPctGdp", x => nf(1).format(x) + " % PIB", "RemittancesPctGdpYear")],
+        ["Deuda pública", v("PublicDebtPctGdp", x => nf(0).format(x) + " % PIB", "PublicDebtPctGdpYear")],
+      ];
+  const pill = !isAgg && c.IncomeGroup ? ` <span class="pill">Ingreso ${INC_ES[c.IncomeGroup].toLowerCase()}</span>` : "";
+  return `<div class="card-sec"><h3>Economía${pill}</h3><div class="stats">${rows.map(r => `<div class="stat"><span class="l">${r[0]}</span><span class="v">${r[1]}</span></div>`).join("")}</div></div>`;
+}
+
+function decompNote(c) {
+  const nat = c.NaturalIncrease, mig = c.NetMigrants;
+  if (nat < 0 && mig > 0 && c.NetChange > 0) return "Mueren más personas de las que nacen. La migración es lo único que sostiene el crecimiento.";
+  if (nat < 0 && mig > 0) return "Mueren más de las que nacen, y la migración no alcanza a compensarlo.";
+  if (nat < 0) return "Mueren más personas de las que nacen y además se van más de las que llegan.";
+  if (mig < 0 && -mig > nat * 0.3) return `La emigración se lleva el ${pctU(-mig / nat)} de lo que suman los nacimientos.`;
+  return "Casi todo el cambio viene de nacimientos menos muertes.";
+}
+
+function drawDecomp(c) {
+  const g = d3.select("#decomp");
+  const items = [["Nacimientos − muertes", c.NaturalIncrease], ["Migración neta", c.NetMigrants], ["Cambio total", c.NetChange]];
+  const ext = d3.max(items, d => Math.abs(d[1])) || 1;
+  const x = d3.scaleLinear().domain([-ext, ext]).range([128, 236]);
+  items.forEach((d, i) => {
+    const y = i * 21 + 2;
+    g.append("text").attr("x", 0).attr("y", y + 12).attr("class", "lbl-2").text(d[0]);
+    g.append("rect").attr("x", Math.min(x(0), x(d[1]))).attr("y", y + 2).attr("height", 12)
+      .attr("width", Math.max(1, Math.abs(x(d[1]) - x(0)))).attr("rx", 2)
+      .attr("fill", d[1] >= 0 ? css("--pos2") : css("--neg2")).attr("fill-opacity", i === 2 ? 1 : 0.6);
+    g.append("text").attr("x", 300).attr("y", y + 12).attr("text-anchor", "end").attr("class", "lbl-2").text(shortS(d[1]));
+  });
+  g.append("line").attr("x1", x(0)).attr("x2", x(0)).attr("y1", 0).attr("y2", 64).attr("stroke", css("--muted"));
+}
+
+// ---------- Hallazgos ----------
+function insights() {
+  const sum = (f, k = "Population2026") => d3.sum(C.filter(f), c => c[k]);
+  const af = c => c.Continent === "Africa", eu = c => c.Continent === "Europe";
+  const afGrowth = sum(af, "NetChange") / WORLD_NET, afPop = sum(af) / WORLD_POP;
+  const shrink = C.filter(c => c.NetChange < 0);
+  const below = sum(c => c.FertilityRate < 2.1) / WORLD_POP;
+  const euNat = sum(eu, "NaturalIncrease"), euMig = sum(eu, "NetMigrants");
+  const poorer = c => c.IncomeGroup === "Low income" || c.IncomeGroup === "Lower middle income";
+  const poorShareGrowth = sum(poorer, "NetChange") / WORLD_NET, poorSharePop = sum(poorer) / WORLD_POP;
+  const fall = C.filter(c => c.GdpPcGrowth < 0);
+  const list = [
+    { v: pctU(afGrowth), t: `del crecimiento mundial ocurre en África, que tiene el ${pctU(afPop)} de la población.`, go: { metric: "change", cont: "Africa", inc: null } },
+    { v: String(shrink.length), t: `países pierden población. Allí vive el ${pctU(sum(c => c.NetChange < 0) / WORLD_POP)} de la humanidad, China incluida.`, go: { metric: "change", cont: null, inc: null } },
+    { v: pctU(below), t: "de las personas vive en un país donde se tienen menos de 2,1 hijos por mujer.", go: { metric: "fert", cont: null, inc: null } },
+    { v: short(euNat), t: `es el saldo de nacimientos menos muertes en Europa. La migración (${shortS(euMig)}) amortigua la caída.`, go: { metric: "mig", cont: "Europe", inc: null } },
+    { v: pctU(poorShareGrowth), t: `del crecimiento de la población ocurre en países de ingreso bajo y medio-bajo, que tienen el ${pctU(poorSharePop)} de la gente.`, go: { metric: "gdppc", cont: null, inc: null } },
+    { v: String(fall.length), t: `países donde la población crece más rápido que la economía en 2026: el ingreso por persona cae para ${short(d3.sum(fall, c => c.Population2026))} de personas.`, go: { metric: "pcgrow", cont: null, inc: null } },
+  ];
+  d3.select("#insights").selectAll("button").data(list).join("button").attr("class", "insight")
+    .html(d => `<span class="v">${d.v}</span><p>${d.t}</p><span class="go">Ver en el mapa →</span>`)
+    .on("click", (e, d) => {
+      Object.assign(state, d.go, { sel: null }); render();
+      document.getElementById("mapbox").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    });
+}
+
+// ---------- Simulador ----------
+d3.select("#year").on("input", e => { state.year = +e.target.value; renderSim(); });
+function renderSim() {
+  const n = state.year - 2026;
+  d3.select("#yearv").text(state.year);
+  const s = C.filter(inFilter).map(c => ({ c, p0: c.Population2026, p: c.Population2026 * Math.pow(1 + c.YearlyChangePct, n) }));
+  const tot0 = d3.sum(s, d => d.p0), tot = d3.sum(s, d => d.p);
+  const r0 = new Map([...s].sort((a, b) => b.p0 - a.p0).map((d, i) => [d.c.ISO3, i + 1]));
+  const top = [...s].sort((a, b) => b.p - a.p).slice(0, 10);
+  d3.select("#simTotal").html(`${filterName()} en ${state.year}: <b class="num">${short(tot)}</b> (${pct(tot / tot0 - 1, 1)} frente a 2026)`);
+
+  const g = d3.select("#simSvg"); g.selectAll("*").remove();
+  const m = { l: 128, r: 74, t: 4, b: 24 }, w = 560, h = 360;
+  const x = d3.scaleLinear().domain([0, d3.max(top, d => Math.max(d.p, d.p0))]).nice().range([m.l, w - m.r]);
+  const y = d3.scaleBand().domain(top.map(d => d.c.ISO3)).range([m.t, h - m.b]).padding(0.28);
+  g.append("g").attr("class", "grid").selectAll("line").data(x.ticks(4)).join("line")
+    .attr("x1", x).attr("x2", x).attr("y1", m.t).attr("y2", h - m.b);
+  g.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`)
+    .call(d3.axisBottom(x).ticks(4).tickFormat(short).tickSize(0)).call(a => a.select(".domain").remove())
+    .selectAll("text").attr("dy", "1.2em");
+  const row = g.selectAll(".r").data(top).join("g").attr("transform", d => `translate(0,${y(d.c.ISO3)})`)
+    .style("cursor", "pointer").on("click", (e, d) => select(d.c.ISO3));
+  row.append("rect").attr("x", m.l).attr("height", y.bandwidth()).attr("rx", 3)
+    .attr("width", d => x(d.p) - m.l).attr("fill", d => d.c.ISO3 === state.sel ? css("--accent") : css("--dot")).attr("fill-opacity", 0.85);
+  row.append("line").attr("x1", d => x(d.p0)).attr("x2", d => x(d.p0)).attr("y1", -3).attr("y2", y.bandwidth() + 3)
+    .attr("stroke", css("--ink")).attr("stroke-width", 2);
+  row.append("text").attr("class", "lbl").attr("x", m.l - 8).attr("y", y.bandwidth() / 2).attr("dy", "0.35em").attr("text-anchor", "end")
+    .text(d => d.c.Country.length > 17 ? d.c.Country.slice(0, 16) + "…" : d.c.Country);
+  row.append("text").attr("class", "lbl-2").attr("x", d => Math.max(x(d.p), x(d.p0)) + 6).attr("y", y.bandwidth() / 2).attr("dy", "0.35em")
+    .text(d => short(d.p));
+  row.each(function (d, i) {
+    const delta = r0.get(d.c.ISO3) - (i + 1);
+    if (!delta) return;
+    d3.select(this).append("text").attr("x", 4).attr("y", y.bandwidth() / 2).attr("dy", "0.35em")
+      .attr("class", delta > 0 ? "up" : "down").style("font-size", "11px").style("font-weight", 600)
+      .text((delta > 0 ? "▲" : "▼") + Math.abs(delta));
+  });
+  g.append("text").attr("class", "lbl-2").attr("x", w - m.r + 70).attr("y", h - 4).attr("text-anchor", "end").text("| = 2026");
+}
+
+// ---------- Dispersión ----------
+const AXES = {
+  GdpPcPpp: { label: "PIB per cápita (PPA, $)", log: true, fmt: usd },
+  FertilityRate: { label: "Fecundidad (hijos por mujer)", fmt: v => nf(2).format(v), ref: 2.1, refLabel: "2,1 · reemplazo" },
+  MedianAge: { label: "Edad mediana (años)", fmt: v => nf(1).format(v) },
+  LifeExpectancy: { label: "Esperanza de vida (años)", fmt: v => nf(1).format(v) },
+  YearlyChangePct: { label: "Cambio anual de la población", fmt: v => pct(v), ref: 0 },
+  GdpGrowth: { label: "Crecimiento del PIB 2026 (%)", fmt: v => signed(v, 1) + " %", ref: 0 },
+  GdpPcGrowth: { label: "Ingreso por persona 2026 (%)", fmt: v => signed(v, 1) + " %", ref: 0 },
+  DependencyRatio: { label: "Dependencia (por 100 en edad de trabajar)", fmt: v => nf(0).format(v) },
+  UrbanPopPct: { label: "Urbanización", fmt: v => pctU(v) },
+  RemittancesPctGdp: { label: "Remesas (% del PIB)", log: true, fmt: v => nf(1).format(v) + " %" },
+  YouthUnemployment: { label: "Desempleo juvenil (%)", fmt: v => nf(1).format(v) + " %" },
+  PublicDebtPctGdp: { label: "Deuda pública (% del PIB)", fmt: v => nf(0).format(v) + " %" },
+  Gini: { label: "Desigualdad (Gini)", fmt: v => nf(1).format(v) },
+  DensityPerKm2: { label: "Densidad (hab/km²)", log: true, fmt: v => int(v) },
+};
+for (const [id, key] of [["#xSel", "sx"], ["#ySel", "sy"]]) {
+  d3.select(id).selectAll("option").data(Object.entries(AXES)).join("option").attr("value", d => d[0]).text(d => d[1].label);
+  d3.select(id).property("value", state[key]).on("change", e => { state[key] = e.target.value; renderScatter(); });
+}
+// Correlación de rangos (Spearman): no la distorsionan los extremos ni la escala log.
+function spearman(xs, ys) {
+  const rank = a => { const o = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0]), r = new Array(a.length);
+    for (let i = 0; i < o.length;) { let j = i; while (j + 1 < o.length && o[j + 1][0] === o[i][0]) j++; for (let k = i; k <= j; k++) r[o[k][1]] = (i + j) / 2; i = j + 1; } return r; };
+  const rx = rank(xs), ry = rank(ys), mx = d3.mean(rx), my = d3.mean(ry);
+  return d3.sum(rx, (v, i) => (v - mx) * (ry[i] - my)) / Math.sqrt(d3.sum(rx, v => (v - mx) ** 2) * d3.sum(ry, v => (v - my) ** 2));
+}
+function renderScatter() {
+  const g = d3.select("#scatter"); g.selectAll("*").remove();
+  const ax = AXES[state.sx], ay = AXES[state.sy];
+  const ok = c => [state.sx, state.sy].every(k => c[k] != null && !Number.isNaN(c[k]) && (!AXES[k].log || c[k] > 0));
+  const data = C.filter(ok).sort((a, b) => b.Population2026 - a.Population2026);
+  const w = 560, h = 400, m = { l: 48, r: 14, t: 12, b: 40 };
+  const scale = (a, k, range) => {
+    const ext = d3.extent(data, c => c[k]);
+    return a.log ? d3.scaleLog().domain([ext[0] / 1.15, ext[1] * 1.15]).range(range)
+                 : d3.scaleLinear().domain(ext).nice().range(range);
+  };
+  const x = scale(ax, state.sx, [m.l, w - m.r]), y = scale(ay, state.sy, [h - m.b, m.t]);
+  const r = d3.scaleSqrt().domain([0, d3.max(C, c => c.Population2026)]).range([1.5, 28]);
+  const tickFmt = (a, k) => v => k === "YearlyChangePct" || k === "UrbanPopPct" ? pctU(v) : a.log ? (v >= 1e6 ? short(v) : v >= 1000 ? int(v / 1000) + " mil" : nf(v < 0.1 ? 2 : v < 1 ? 1 : 0).format(v)) : nf(Math.abs(v) < 10 && v % 1 ? 1 : 0).format(v);
+  // Escala log: solo 1 y 3 por potencia de 10 (o solo potencias si no caben).
+  const logTicks = sc => {
+    const [a, b] = sc.domain(), out = [];
+    for (let k = Math.floor(Math.log10(a)); k <= Math.ceil(Math.log10(b)); k++)
+      for (const mnt of [1, 3]) { const v = mnt * 10 ** k; if (v >= a && v <= b) out.push(v); }
+    return out.length > 7 ? out.filter(v => Math.log10(v) % 1 === 0) : out;
+  };
+  const yt = ay.log ? logTicks(y) : y.ticks(5);
+  const xt = ax.log ? logTicks(x) : x.ticks(6);
+  g.append("g").attr("class", "grid").selectAll("line").data(yt).join("line").attr("x1", m.l).attr("x2", w - m.r).attr("y1", y).attr("y2", y);
+  g.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickValues(xt).tickSize(0).tickFormat(tickFmt(ax, state.sx))).call(a => a.select(".domain").remove()).selectAll("text").attr("dy", "1.1em");
+  g.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(yt).tickSize(0).tickFormat(tickFmt(ay, state.sy))).call(a => a.select(".domain").remove()).selectAll("text").attr("dx", "-0.4em");
+  g.append("text").attr("class", "lbl-2").attr("x", w - m.r).attr("y", h - 4).attr("text-anchor", "end").text(ax.label + " →");
+  g.append("text").attr("class", "lbl-2").attr("x", m.l + 4).attr("y", m.t + 10).text("↑ " + ay.label);
+  const refs = [];
+  if (ax.ref != null && x.domain()[0] < ax.ref && ax.ref < x.domain()[1]) refs.push(["x", ax]);
+  if (ay.ref != null && y.domain()[0] < ay.ref && ay.ref < y.domain()[1]) refs.push(["y", ay]);
+  refs.forEach(([d, a]) => {
+    const line = g.append("line").attr("stroke", css("--ink-2")).attr("stroke-dasharray", "4 3");
+    if (d === "x") line.attr("x1", x(a.ref)).attr("x2", x(a.ref)).attr("y1", m.t).attr("y2", h - m.b);
+    else line.attr("x1", m.l).attr("x2", w - m.r).attr("y1", y(a.ref)).attr("y2", y(a.ref));
+    if (a.refLabel) g.append("text").attr("class", "lbl-2").attr("x", d === "x" ? x(a.ref) + 5 : w - m.r - 4).attr("y", d === "x" ? h - m.b - 8 : y(a.ref) - 5).attr("text-anchor", d === "x" ? "start" : "end").text(a.refLabel);
+  });
+  g.append("g").selectAll("circle").data(data).join("circle").attr("class", "dot")
+    .attr("cx", c => x(c[state.sx])).attr("cy", c => y(c[state.sy])).attr("r", c => r(c.Population2026))
+    .classed("faded", c => !inFilter(c)).classed("sel", c => c.ISO3 === state.sel)
+    .on("pointermove", (e, c) => scatterTip(e, c)).on("pointerleave", () => sTip.attr("hidden", true))
+    .on("click", (e, c) => select(c.ISO3));
+  const lab = ["IND", "CHN", "NGA", "USA", "NER"].map(i => byIso.get(i)).filter(c => c && ok(c) && inFilter(c));
+  if (state.sel && ok(byIso.get(state.sel)) && !lab.some(c => c.ISO3 === state.sel)) lab.push(byIso.get(state.sel));
+  g.append("g").selectAll("text").data(lab).join("text").attr("class", "lbl").style("font-weight", 600)
+    .attr("text-anchor", c => x(c[state.sx]) > w - 120 ? "end" : "start")
+    .attr("x", c => x(c[state.sx]) > w - 120 ? x(c[state.sx]) - r(c.Population2026) * 0.7 - 4 : x(c[state.sx]) + r(c.Population2026) * 0.7 + 4).attr("y", c => Math.max(m.t + 24, y(c[state.sy]) - r(c.Population2026) * 0.7 - 2))
+    .text(c => c.Country).style("pointer-events", "none");
+  const vis = data.filter(inFilter);
+  const rho = vis.length > 5 ? spearman(vis.map(c => c[state.sx]), vis.map(c => c[state.sy])) : NaN;
+  const strength = Math.abs(rho) >= 0.7 ? "fuerte" : Math.abs(rho) >= 0.4 ? "moderada" : "débil";
+  const bare = a => a.label.replace(/ \(.*\)/, "");
+  const lower = t => /^[A-ZÁÉÍÓÚ]{2}/.test(t) ? t : t[0].toLowerCase() + t.slice(1);
+  d3.select("#scTitle").text(`${bare(ay)} contra ${lower(bare(ax))}`);
+  d3.select("#corr").html(Number.isNaN(rho) ? "Pocos países con dato para medir la relación." :
+    `${vis.length} países con dato · correlación de rangos <b class="num">${signed(rho, 2)}</b>, relación ${strength} ${rho < 0 ? "inversa" : "directa"}. Correlación no es causalidad.`);
+}
+const sTip = d3.select(document.body).append("div").attr("class", "tip").attr("hidden", true).style("position", "fixed");
+function scatterTip(e, c) {
+  const row = (l, v) => `<div class="row"><span>${l}</span><span>${v}</span></div>`;
+  sTip.attr("hidden", null).html(`<b>${c.Country}</b>` + row(AXES[state.sx].label, AXES[state.sx].fmt(c[state.sx])) + row(AXES[state.sy].label, AXES[state.sy].fmt(c[state.sy])) + row("Población", short(c.Population2026)));
+  const t = sTip.node();
+  let xx = e.clientX + 14, yy = e.clientY + 14;
+  if (xx + t.offsetWidth > innerWidth) xx = e.clientX - t.offsetWidth - 14;
+  if (yy + t.offsetHeight > innerHeight) yy = e.clientY - t.offsetHeight - 14;
+  sTip.style("left", xx + "px").style("top", yy + "px");
+}
+
+// ---------- Tabla ----------
+const COLS = [
+  ["Rank", "#", int], ["Country", "País", v => v], ["Continent", "Continente", v => CONT_ES[v]],
+  ["Population2026", "Población", int], ["YearlyChangePct", "Cambio %", v => pct(v)], ["NetChange", "Crec. neto", v => signed(v)],
+  ["NetMigrants", "Migración", v => signed(v)], ["LandAreaKm2", "Superficie km²", int], ["DensityPerKm2", "Hab/km²", int], ["FertilityRate", "Fecundidad", v => nf(2).format(v)],
+  ["MedianAge", "Edad med.", v => nf(1).format(v)], ["UrbanPopPct", "Urbana", v => v == null ? "—" : pctU(v)],
+  ["IncomeGroup", "Ingreso", v => v ? INC_ES[v] : "—"], ["GdpPcPpp", "PIB pc (PPA)", v => v == null ? "—" : usd(v)],
+  ["GdpGrowth", "PIB 2026", v => v == null ? "—" : signed(v, 1) + " %"], ["GdpPcGrowth", "Ingreso p/p", v => v == null ? "—" : signed(v, 1) + " %"],
+  ["LifeExpectancy", "Esp. vida", v => v == null ? "—" : nf(1).format(v)],
+];
+d3.select("#tbl thead tr").selectAll("th").data(COLS).join("th").attr("tabindex", 0).text(d => d[1])
+  .on("click keydown", (e, d) => {
+    if (e.type === "keydown" && e.key !== "Enter") return;
+    state.sort = { key: d[0], dir: state.sort.key === d[0] ? -state.sort.dir : (typeof C[0][d[0]] === "string" ? 1 : -1) };
+    renderTable();
+  });
+d3.select("#q").on("input", e => { state.q = e.target.value.trim().toLowerCase(); renderTable(); });
+function renderTable() {
+  const { key, dir } = state.sort;
+  const rows = C.filter(inFilter).filter(c => !state.q || c.Country.toLowerCase().includes(state.q))
+    .sort((a, b) => { const va = a[key], vb = b[key]; if (va == null) return 1; if (vb == null) return -1; return (va > vb ? 1 : va < vb ? -1 : 0) * dir; });
+  d3.select("#tblCount").text(`${rows.length} países y territorios · toca una columna para ordenar`);
+  d3.select("#tbl thead").selectAll("th").attr("aria-sort", d => d[0] === key ? (dir > 0 ? "ascending" : "descending") : null);
+  buildScale();
+  d3.select("#tbl tbody").selectAll("tr").data(rows, c => c.ISO3).join("tr")
+    .classed("sel", c => c.ISO3 === state.sel)
+    .on("click", (e, c) => { select(c.ISO3); document.getElementById("card").scrollIntoView({ behavior: "auto", block: "nearest" }); })
+    .html(c => COLS.map(([k, , f], i) => `<td>${i === 1 ? `<span class="sw" style="background:${colorOf(c)}"></span>` : ""}${f(c[k])}</td>`).join(""));
+}
+
+// ---------- Render ----------
+function render() {
+  contBox.selectAll("button").attr("aria-pressed", d => String(d === state.cont));
+  d3.select("#metricSel").property("value", state.metric);
+  incBox.selectAll("button").attr("aria-pressed", d => String(d === state.inc));
+  kpis(); renderMap(); renderCard(); renderSim(); renderScatter(); renderTable();
+}
+insights();
+render();
+// Re-pintar al cambiar el tema (los colores salen de variables CSS)
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+addEventListener("resize", () => renderLegend());
+</script>
