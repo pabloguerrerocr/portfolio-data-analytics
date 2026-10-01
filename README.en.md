@@ -51,6 +51,14 @@ The data downloads itself from the OECD. No raw data is versioned.
 
 ---
 
+## Also in this repository
+
+**[World population 2026 in Power BI](poblacion-mundial/README.en.md)**: Africa holds
+19% of the population and accounts for 51% of growth. A map of 234 countries, with
+the data validated before it is charted.
+
+---
+
 ## Other repositories
 
 | Repository | What it is about |

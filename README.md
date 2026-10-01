@@ -49,6 +49,14 @@ Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
 
 ---
 
+## También en este repositorio
+
+**[Población mundial 2026 en Power BI](poblacion-mundial/)**: África tiene el 19 % de
+la población y aporta el 51 % del crecimiento. Mapa de 234 países con datos
+verificados antes de graficar.
+
+---
+
 ## Otros repositorios
 
 | Repositorio | De qué va |

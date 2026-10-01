@@ -12,6 +12,7 @@ venv/
 *.xlsx
 *.db
 *.duckdb
+*.geojson
 
 # Sistema
 .DS_Store
