@@ -13,7 +13,8 @@ Modelos:
   - Random Forest y Gradient Boosting sobre el mismo conjunto ampliado
 
 Salidas: resultados_ml.csv (predicción por trimestre y modelo)
-         tabla_ml.csv     (RMSE y mejora contra cada referente)
+         tabla_ml.csv     (RMSE, mejora contra cada referente y valor p de
+                           Diebold-Mariano contra la OLS y contra el promedio)
 
 Uso: python ml.py
 """
@@ -25,6 +26,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import Lasso, LinearRegression, Ridge
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
@@ -91,6 +93,15 @@ def backtest_ml(d: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(filas).set_index("trimestre")
 
 
+def diebold_mariano(a, b, y) -> float:
+    """Valor p de Diebold-Mariano (pérdida cuadrática, horizonte 1, corrección
+    de Harvey, Leybourne y Newbold). H0: los dos pronósticos son igual de buenos."""
+    d = (y - a) ** 2 - (y - b) ** 2
+    n = len(d)
+    estad = d.mean() / np.sqrt(d.var(ddof=1) / n) * np.sqrt((n - 1) / n)
+    return float(2 * (1 - stats.t.cdf(abs(estad), n - 1)))
+
+
 def tabla(res: pd.DataFrame, etiqueta: str) -> pd.DataFrame:
     nombres = [c for c in res.columns if c not in ("observado", "ingenuo", "promedio")]
     r_ing = rmse(res["ingenuo"], res["observado"])
@@ -98,9 +109,13 @@ def tabla(res: pd.DataFrame, etiqueta: str) -> pd.DataFrame:
     filas = []
     for n in nombres:
         r = rmse(res[n], res["observado"])
+        y = res["observado"]
         filas.append({"muestra": etiqueta, "modelo": n, "rmse": r,
                       "mejora_vs_ingenuo_pc": (1 - r / r_ing) * 100,
-                      "mejora_vs_promedio_pc": (1 - r / r_prom) * 100})
+                      "mejora_vs_promedio_pc": (1 - r / r_prom) * 100,
+                      "p_dm_vs_ols": (np.nan if n.startswith("OLS")
+                                      else diebold_mariano(res[n], res["OLS (nowcast.py)"], y)),
+                      "p_dm_vs_promedio": diebold_mariano(res[n], res["promedio"], y)})
     return pd.DataFrame(filas)
 
 

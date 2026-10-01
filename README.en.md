@@ -36,6 +36,14 @@ All the signal comes from a single variable: **manufacturing production**
 (t = 3.53). Exports are not significant, which is a finding in itself for an
 economy that thinks of itself as export-driven.
 
+## And with machine learning?
+
+Ridge, LASSO, Random Forest and Gradient Boosting, retrained every quarter with
+time-series cross-validation ([`ml.py`](nowcasting-pib/ml.py)), cut the error by up to
+**13.2%** against the historical mean excluding 2020. **None beats the two-variable
+regression with statistical significance** (Diebold-Mariano, p ≥ 0.32). With 46
+quarters, a bigger model is not more signal.
+
 ## What the model does not do
 
 In 2020-Q2 GDP fell **8.3%** and the nowcast predicted **+0.4%**. It does not

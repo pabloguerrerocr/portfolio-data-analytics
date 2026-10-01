@@ -74,6 +74,28 @@ Ventana expansiva: para el trimestre *t* el modelo se ajusta solo con datos hast
 
 Excluyendo 2020: +31,8 % y +7,0 % respectivamente. El resultado no depende de la pandemia.
 
+## ¿Y con machine learning?
+
+`ml.py` reentrena cuatro modelos cada trimestre, solo con el pasado y con
+hiperparámetros elegidos por validación cruzada de series de tiempo, y los mide
+contra los mismos dos referentes. La fila OLS reproduce `nowcast.py` exactamente.
+
+| Modelo | Mejora sobre el promedio histórico | Sin 2020 | ¿Distinto de la OLS? (p, Diebold-Mariano) |
+|---|---:|---:|---:|
+| OLS (dos variables) | 6,3 % | 6,4 % | — |
+| **Ridge** | **8,1 %** | **13,2 %** | 0,55 |
+| LASSO | 7,6 % | 12,6 % | 0,66 |
+| Random Forest | 6,5 % | 11,6 % | 0,90 |
+| Gradient Boosting | 6,5 % | 8,9 % | 0,97 |
+
+**Ningún modelo le gana a la regresión de dos variables de forma estadísticamente
+significativa.** Ridge reduce más el error, pero con 46 trimestres la diferencia
+cabe en el ruido (p = 0,55). Lo poco que se gana viene de regularizar y de sumar
+rezagos, no de la no linealidad: los árboles quedan detrás de Ridge. Y la propia
+OLS tampoco se distingue del promedio histórico con significancia (p = 0,13), lo
+que confirma la lectura de arriba. Con datos frescos de la OCDE las mejoras de la
+OLS quedan en 30,5 % y 6,3 %, muy cerca del 30,6 % y 6,5 % originales.
+
 ## Limitaciones — lo que el modelo no hace
 
 - **No anticipa puntos de quiebre.** En 2020-Q2 el PIB cayó 8,3 % y el nowcast
@@ -102,4 +124,5 @@ python nowcast.py            # modelo, evaluación y gráfico
 |---|---|
 | `descargar_datos.py` | Descarga reproducible desde la API SDMX de la OCDE |
 | `nowcast.py` | Panel, backtest, diagnóstico de regresión y gráfico |
+| `ml.py` | Comparación con Ridge, LASSO, Random Forest y Gradient Boosting, con prueba de Diebold-Mariano |
 | `resultados_nowcast.csv` | Nowcast y referentes, trimestre por trimestre |

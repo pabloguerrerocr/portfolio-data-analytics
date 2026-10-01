@@ -35,6 +35,14 @@ Toda la señal viene de una sola variable: la **producción manufacturera** (t =
 Las exportaciones no resultan significativas, que es en sí mismo un hallazgo para una
 economía que se piensa a sí misma como exportadora.
 
+## ¿Y con machine learning?
+
+Ridge, LASSO, Random Forest y Gradient Boosting, reentrenados cada trimestre con
+validación cruzada de series de tiempo ([`ml.py`](nowcasting-pib/ml.py)), reducen el
+error hasta **13,2 %** frente al promedio histórico excluyendo 2020. **Ninguno le gana
+a la regresión de dos variables con significancia estadística** (Diebold-Mariano,
+p ≥ 0,32). Con 46 trimestres, más modelo no es más señal.
+
 ## Lo que el modelo no hace
 
 En 2020-Q2 el PIB cayó **8,3 %** y el nowcast predijo **+0,4 %**. No anticipa quiebres
