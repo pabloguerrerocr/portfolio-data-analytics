@@ -97,4 +97,4 @@ the data validated before it is charted.
 
 ---
 
-📍 Costa Rica · Native Spanish, C1 English · [LinkedIn](https://linkedin.com/in/pabloguerrerocr)
+📍 Costa Rica · Native Spanish, C1 English · [LinkedIn](https://linkedin.com/in/pabloguerrerocr) · pabloguerrerocr@gmail.com
