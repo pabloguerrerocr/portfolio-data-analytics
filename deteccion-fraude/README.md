@@ -20,7 +20,7 @@ Boosting.*
 Cuando revisar es caro, alertar por **probabilidad × monto > costo** ahorra 7,5
 puntos más que el mejor umbral, y la diferencia es significativa. Lo hace
 detectando **menos** fraudes (21 contra 57): deja pasar los de €1 y persigue los
-que valen la revisión. Cuando revisar es barato, las dos reglas empatan.
+que valen la revisión. Cuando revisar es barato, la diferencia no es significativa.
 
 ![Ahorro por umbral](graficos/ahorro_por_umbral.png)
 
