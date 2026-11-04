@@ -138,4 +138,5 @@ python nowcast.py            # modelo, evaluación y gráfico
 | `nowcast.py` | Panel, backtest, diagnóstico de regresión y gráfico |
 | `ml.py` | Comparación con Ridge, LASSO, Random Forest y Gradient Boosting, con prueba de Diebold-Mariano |
 | `r/nowcast.R` | Réplica en R (dplyr, ggplot2) verificada contra `nowcast.py` |
+| `grafico_referentes.py` | El error de cada modelo frente a los dos referentes (`graficos/referentes.png`), desde `resultados_ml.csv` |
 | `resultados_nowcast.csv` | Nowcast y referentes, trimestre por trimestre |

@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "nowcasting-pib/ml.py"
+      - "nowcasting-pib/grafico_referentes.py"
       - ".github/workflows/nowcast-ml.yml"
 
 permissions:
@@ -26,15 +27,19 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Bajar datos de la OCDE y comparar modelos
         working-directory: nowcasting-pib
-        run: python ml.py
+        run: |
+          python ml.py
+          python grafico_referentes.py
       - name: Guardar si cambió
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f nowcasting-pib/resultados_ml.csv nowcasting-pib/tabla_ml.csv
+          git add -f nowcasting-pib/resultados_ml.csv nowcasting-pib/tabla_ml.csv \
+            nowcasting-pib/graficos/referentes.png
           if git diff --cached --quiet; then
             echo "Sin cambios."
           else
             git commit -m "Actualizar la comparación de machine learning del nowcast"
+            git pull --rebase --autostash
             git push
           fi

@@ -1,64 +1,87 @@
 # Nowcasting del PIB trimestral de Costa Rica
 
-*[English version](README.en.md)*
+*[English version](README.en.md)* ·
+**[Tablero interactivo →](https://pabloguerrerocr.github.io/nowcast/)** elegí el período y mirá cómo cambia la ventaja del modelo
 
-**[Explorar el tablero interactivo →](https://pabloguerrerocr.github.io/nowcast/)** Elegí el período y mirá cómo cambia la ventaja del modelo.
+**Pregunta.** El PIB trimestral se publica con meses de rezago. ¿Cuánto se puede
+anticipar su crecimiento con los indicadores de coyuntura que salen antes?
 
-**El referente ingenuo es difícil de vencer, y casi nadie lo reporta.**
-
-Estimar el crecimiento del PIB antes de que se publique la cifra oficial, con
-indicadores de coyuntura de la OCDE. El resultado tiene dos números, no uno, y esa
-es la mitad del punto:
+**Respuesta corta: poco, y casi nadie lo reporta así.** El nowcast reduce el error
+**30,6 %** frente a repetir el trimestre anterior, el referente que todos publican,
+pero solo **6,5 %** frente al promedio histórico, que es el que dice si el modelo aporta
+algo.
 
 | Contra qué se compara | Reducción del error |
 |---|---:|
 | Repetir el trimestre anterior (el referente fácil) | **30,6 %** |
 | Predecir el promedio histórico (el referente exigente) | **6,5 %** |
 
-Casi todo el trabajo publicado de nowcasting reporta el primero. El segundo es el
-que dice si el modelo aporta algo, y acá aporta poco: el R² es **0,154**.
+![Todos le ganan al referente fácil; ninguno, por mucho, al exigente](nowcasting-pib/graficos/referentes.png)
+
+## Tres hallazgos
+
+**1. Contra el referente exigente, el modelo aporta poco.** La mejora es de 6,5 % (7,0 %
+sin 2020) y el R² dentro de muestra es de **0,154**. La primera versión nowcasteaba la
+variación interanual y daba +13,7 %, pero al excluir 2020 caía a +0,6 %: todo el mérito
+era la pandemia. Con la variación trimestral y dos referentes el resultado es menos
+vistoso, pero se sostiene.
+
+**2. El machine learning no cambia la conclusión.** Ridge, LASSO, Random Forest y
+Gradient Boosting, reentrenados cada trimestre con validación cruzada de series de
+tiempo, reducen el error hasta 13,2 % frente al promedio histórico sin 2020, pero
+**ninguno le gana a la regresión de dos variables con significancia estadística**
+(Diebold-Mariano, p ≥ 0,32). Con 46 trimestres, más modelo no es más señal.
+
+**3. La señal viene de la manufactura, y el modelo no ve los quiebres.** Toda la
+capacidad predictiva sale de la producción manufacturera (t = 3,53); las exportaciones
+no son significativas (t = 1,35), un hallazgo en sí mismo para una economía que se
+piensa exportadora. En 2020-Q2 el PIB cayó **8,3 %** y el nowcast predijo **+0,4 %**: no
+anticipa quiebres y no pretende hacerlo.
 
 ![Nowcast del PIB](nowcasting-pib/graficos/nowcast_pib.png)
 
-## Por qué el resultado honesto vale más que el resultado bonito
+## Datos
 
-La primera versión nowcasteaba la variación **interanual** y daba +13,7 % de mejora.
-Al excluir 2020 caía a **+0,6 %**: todo el mérito era la pandemia. Un modelo que solo
-acierta el año del derrumbe no sirve para el trimestre que viene.
+Indicadores de corto plazo de la **OCDE** para Costa Rica (Key Economic Indicators), por
+su API SDMX pública y sin llave. Son las cifras que el BCCR reporta a la organización:
 
-Cambiar el objetivo a la variación **trimestral** y evaluar contra **dos** referentes
-en lugar de uno vuelve el resultado consistente y mucho menos vistoso. Se probaron 36
-especificaciones; las parsimoniosas superaron sistemáticamente a las de seis
-predictores.
+| Serie | Código OCDE | Uso |
+|---|---|---|
+| PIB trimestral en volumen, variación contra el trimestre anterior | `B1GQ_Q`, `G1` | lo que se predice |
+| Producción manufacturera, variación mensual | `PRVM`, actividad `C`, `G1` | predictor (promedio del trimestre) |
+| Exportaciones, variación mensual | `EX`, `G1` | predictor (promedio del trimestre) |
 
-Toda la señal viene de una sola variable: la **producción manufacturera** (t = 3,53).
-Las exportaciones no resultan significativas, que es en sí mismo un hallazgo para una
-economía que se piensa a sí misma como exportadora.
+Datos de 2000 a 2026-Q2. Los datos crudos no se versionan: `nowcast.py` los baja solo
+si faltan (unos 760 KB).
 
-Hay una [réplica en R](nowcasting-pib/r/nowcast.R) (dplyr, ggplot2) que GitHub Actions
-verifica contra la versión en Python, trimestre por trimestre.
+## Método
 
-## ¿Y con machine learning?
+- **Ventana expansiva fuera de muestra:** cada trimestre desde 2015-Q1 se estima solo
+  con información hasta el trimestre anterior. El modelo nunca ve el futuro.
+- **Regresión de dos variables**, elegida entre 36 especificaciones; las de seis
+  predictores sobreajustaban.
+- **Dos referentes** y la raíz del error cuadrático medio (RMSE) como métrica; la
+  prueba de Diebold-Mariano dice si una diferencia es significativa.
+- **Réplica en R** ([`r/nowcast.R`](nowcasting-pib/r/nowcast.R), dplyr y ggplot2) que
+  GitHub Actions verifica contra la versión en Python, trimestre por trimestre.
 
-Ridge, LASSO, Random Forest y Gradient Boosting, reentrenados cada trimestre con
-validación cruzada de series de tiempo ([`ml.py`](nowcasting-pib/ml.py)), reducen el
-error hasta **13,2 %** frente al promedio histórico excluyendo 2020. **Ninguno le gana
-a la regresión de dos variables con significancia estadística** (Diebold-Mariano,
-p ≥ 0,32). Con 46 trimestres, más modelo no es más señal.
+Detalle completo en [`nowcasting-pib/`](nowcasting-pib/README.md).
 
-## Lo que el modelo no hace
-
-En 2020-Q2 el PIB cayó **8,3 %** y el nowcast predijo **+0,4 %**. No anticipa quiebres
-y no pretende hacerlo. Está declarado en el código, en el reporte y acá.
-
-## Correr
+## Cómo correrlo
 
 ```bash
+git clone https://github.com/pabloguerrerocr/portfolio-data-analytics.git
+cd portfolio-data-analytics
 pip install -r requirements.txt
-python nowcasting-pib/nowcast.py
+cd nowcasting-pib
+python nowcast.py               # baja los datos de la OCDE si faltan, estima y grafica
+python ml.py                    # la comparación con machine learning
+python grafico_referentes.py    # el gráfico de los referentes
 ```
 
-Los datos se descargan solos desde la OCDE. No se versiona nada crudo.
+Necesita conexión para la primera descarga. Con datos frescos de la OCDE las cifras se
+mueven un poco porque la OCDE revisa sus series; la última corrida de `ml.py` da 30,5 %
+y 6,3 % para la regresión.
 
 ---
 
@@ -79,7 +102,8 @@ verificados antes de graficar.
 
 | Repositorio | De qué va |
 |---|---|
-| [warehouse-sector-externo](https://github.com/pabloguerrerocr/warehouse-sector-externo) | Esquema estrella en DuckDB sobre el panel del sector externo, con motor de calidad. La desacumulación en SQL reconcilia a `5,7e-14` |
+| [sector-externo-cr-eeuu](https://github.com/pabloguerrerocr/sector-externo-cr-eeuu) | Mi trabajo final de graduación: la tasa de la Fed explica el 44 % de la varianza de las reservas de Costa Rica a 24 meses; el ciclo de EE. UU., el 3 % |
+| [warehouse-sector-externo](https://github.com/pabloguerrerocr/warehouse-sector-externo) | El panel del trabajo de graduación en un esquema estrella de DuckDB y dbt, con motor de calidad: reproduce el original en las 17 comparaciones |
 | [brecha-espejo-cr](https://github.com/pabloguerrerocr/brecha-espejo-cr) | Costa Rica declara exportar $19,9 mm y sus socios declaran importar $34,0 mm. Diez años de brecha espejo, analizados en SQL |
 | [comercio-exterior-cr](https://github.com/pabloguerrerocr/comercio-exterior-cr) | El comercio exterior se concentró en vez de diversificarse: Herfindahl de 0,160 a 0,248 entre 2010 y 2024 |
 
