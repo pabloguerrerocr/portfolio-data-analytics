@@ -1,66 +1,91 @@
 # Nowcasting Costa Rica's quarterly GDP
 
-*[Versión en español](README.md)*
+*[Versión en español](README.md)* ·
+**[Interactive dashboard →](https://pabloguerrerocr.github.io/nowcast/)** (in Spanish) pick the period and watch the model's edge change
 
-**[Explore the interactive dashboard →](https://pabloguerrerocr.github.io/nowcast/)** (in Spanish) Pick the period and watch the model's edge change.
+**Question.** Quarterly GDP is published with a lag of several months. How much of its
+growth can be anticipated with the short-term indicators that come out earlier?
 
-**The naive benchmark is hard to beat, and almost nobody reports it.**
-
-Estimating GDP growth before the official figure is published, using OECD
-short-term indicators. The result has two numbers, not one, and that is half the
-point:
+**Short answer: not much, and almost nobody reports it that way.** The nowcast cuts the
+error by **30.6%** against repeating last quarter, the benchmark everyone publishes, but
+only by **6.5%** against the historical mean, which is the one that tells whether the
+model adds anything.
 
 | Compared against | Error reduction |
 |---|---:|
 | Repeating last quarter (the easy benchmark) | **30.6%** |
 | Predicting the historical mean (the demanding benchmark) | **6.5%** |
 
-Almost all published nowcasting work reports the first one. The second is the one
-that tells you whether the model adds anything, and here it adds little: the R² is
-**0.154**.
+![Every model beats the easy benchmark; none beats the demanding one by much](nowcasting-pib/graficos/referentes.png)
+
+*Chart labels are in Spanish: "repetir el trimestre anterior" is the naive benchmark and
+"promedio histórico" the historical mean.*
+
+## Three findings
+
+**1. Against the demanding benchmark, the model adds little.** The improvement is 6.5%
+(7.0% excluding 2020) and the in-sample R² is **0.154**. The first version nowcast
+year-over-year growth and showed +13.7%, but excluding 2020 it fell to +0.6%: all the
+merit was the pandemic. With quarter-over-quarter growth and two benchmarks the result
+is less flashy, but it holds.
+
+**2. Machine learning does not change the conclusion.** Ridge, LASSO, Random Forest and
+Gradient Boosting, retrained every quarter with time-series cross-validation, cut the
+error by up to 13.2% against the historical mean excluding 2020, but **none beats the
+two-variable regression with statistical significance** (Diebold-Mariano, p ≥ 0.32).
+With 46 quarters, a bigger model is not more signal.
+
+**3. The signal comes from manufacturing, and the model does not see breaks.** All the
+predictive power comes from manufacturing production (t = 3.53); exports are not
+significant (t = 1.35), a finding in itself for an economy that sees itself as
+export-driven. In 2020-Q2 GDP fell **8.3%** and the nowcast predicted **+0.4%**: it does
+not anticipate breaks and does not claim to.
 
 ![GDP nowcast](nowcasting-pib/graficos/nowcast_pib.png)
 
-## Why the honest result is worth more than the pretty one
+## Data
 
-The first version nowcast **year-over-year** growth and showed a +13.7%
-improvement. Excluding 2020 it fell to **+0.6%**: all the merit was the pandemic.
-A model that only gets the crash year right is useless for next quarter.
+**OECD** short-term indicators for Costa Rica (Key Economic Indicators), through its
+public SDMX API with no key. These are the figures the Central Bank of Costa Rica
+reports to the organization:
 
-Switching the target to **quarter-over-quarter** growth and evaluating against
-**two** benchmarks instead of one makes the result consistent and far less
-flashy. 36 specifications were tested; the parsimonious ones systematically beat
-those with six predictors.
+| Series | OECD code | Use |
+|---|---|---|
+| Quarterly GDP volume, change over the previous quarter | `B1GQ_Q`, `G1` | the target |
+| Manufacturing production, monthly change | `PRVM`, activity `C`, `G1` | predictor (quarterly average) |
+| Exports, monthly change | `EX`, `G1` | predictor (quarterly average) |
 
-All the signal comes from a single variable: **manufacturing production**
-(t = 3.53). Exports are not significant, which is a finding in itself for an
-economy that thinks of itself as export-driven.
+Data from 2000 to 2026-Q2. Raw data is not versioned: `nowcast.py` downloads it if
+missing (about 760 KB).
 
-An [R replica](nowcasting-pib/r/nowcast.R) (dplyr, ggplot2) is checked against the
-Python version, quarter by quarter, in GitHub Actions.
+## Method
 
-## And with machine learning?
+- **Out-of-sample expanding window:** each quarter since 2015-Q1 is estimated using only
+  information up to the previous quarter. The model never sees the future.
+- **Two-variable regression**, chosen among 36 specifications; the six-predictor ones
+  overfit.
+- **Two benchmarks** and root mean squared error (RMSE) as the metric; the
+  Diebold-Mariano test says whether a difference is significant.
+- **An R replica** ([`r/nowcast.R`](nowcasting-pib/r/nowcast.R), dplyr and ggplot2) that
+  GitHub Actions checks against the Python version, quarter by quarter.
 
-Ridge, LASSO, Random Forest and Gradient Boosting, retrained every quarter with
-time-series cross-validation ([`ml.py`](nowcasting-pib/ml.py)), cut the error by up to
-**13.2%** against the historical mean excluding 2020. **None beats the two-variable
-regression with statistical significance** (Diebold-Mariano, p ≥ 0.32). With 46
-quarters, a bigger model is not more signal.
-
-## What the model does not do
-
-In 2020-Q2 GDP fell **8.3%** and the nowcast predicted **+0.4%**. It does not
-anticipate structural breaks and does not claim to. That is stated in the code, in
-the report and here.
+Full detail in [`nowcasting-pib/`](nowcasting-pib/README.md) (in Spanish).
 
 ## Run it
 
 ```bash
+git clone https://github.com/pabloguerrerocr/portfolio-data-analytics.git
+cd portfolio-data-analytics
 pip install -r requirements.txt
-python nowcasting-pib/nowcast.py
+cd nowcasting-pib
+python nowcast.py               # downloads the OECD data if missing, estimates and plots
+python ml.py                    # the machine-learning comparison
+python grafico_referentes.py    # the benchmarks chart
 ```
 
-The data downloads itself from the OECD. No raw data is versioned.
+The first download needs a connection. With fresh OECD data the figures move slightly
+because the OECD revises its series; the latest `ml.py` run gives 30.5% and 6.3% for the
+regression.
 
 ---
 
@@ -81,7 +106,8 @@ the data validated before it is charted.
 
 | Repository | What it is about |
 |---|---|
-| [warehouse-sector-externo](https://github.com/pabloguerrerocr/warehouse-sector-externo) | DuckDB star schema over the external-sector panel, with a data quality engine. The SQL de-accumulation reconciles to `5.7e-14` |
+| [sector-externo-cr-eeuu](https://github.com/pabloguerrerocr/sector-externo-cr-eeuu) | My thesis: the Fed's rate explains 44% of the variance of Costa Rica's reserves at 24 months; the U.S. cycle, 3% |
+| [warehouse-sector-externo](https://github.com/pabloguerrerocr/warehouse-sector-externo) | The thesis panel in a DuckDB and dbt star schema, with a data quality engine: it reproduces the original in all 17 comparisons |
 | [brecha-espejo-cr](https://github.com/pabloguerrerocr/brecha-espejo-cr) | Costa Rica reports $19.9 bn in exports and its partners report $34.0 bn in imports. Ten years of mirror-statistics gap, analyzed in SQL |
 | [comercio-exterior-cr](https://github.com/pabloguerrerocr/comercio-exterior-cr) | Foreign trade concentrated instead of diversifying: Herfindahl from 0.160 to 0.248 between 2010 and 2024 |
 
