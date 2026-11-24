@@ -2,6 +2,8 @@
 
 *[English version](README.en.md)*
 
+**Herramientas:** Python (pandas, scikit-learn, SciPy, matplotlib) · R (dplyr, ggplot2) · Power BI (Power Query, DAX) · GitHub Actions
+
 **[Explorar el tablero interactivo →](https://pabloguerrerocr.github.io/nowcast/)** Elegí el período y mirá cómo cambia la ventaja del modelo.
 
 **El referente ingenuo es difícil de vencer, y casi nadie lo reporta.**

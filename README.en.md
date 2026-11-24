@@ -2,6 +2,8 @@
 
 *[Versión en español](README.md)*
 
+**Tools:** Python (pandas, scikit-learn, SciPy, matplotlib) · R (dplyr, ggplot2) · Power BI (Power Query, DAX) · GitHub Actions
+
 **[Explore the interactive dashboard →](https://pabloguerrerocr.github.io/nowcast/)** (in Spanish) Pick the period and watch the model's edge change.
 
 **The naive benchmark is hard to beat, and almost nobody reports it.**
