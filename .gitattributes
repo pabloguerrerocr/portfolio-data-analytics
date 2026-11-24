@@ -1,0 +1,2 @@
+# Los reportes HTML son salidas generadas por los scripts: no cuentan como lenguaje del repo.
+*.html linguist-generated
